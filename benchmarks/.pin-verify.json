@@ -1,0 +1,58 @@
+{
+  "flask": {
+    "head": "36e4a824f340fdee7ed50937ba8e7f6bc7d17f81",
+    "describe": "36e4a82",
+    "date": "2026-05-31",
+    "n_paths": 24,
+    "unresolved": []
+  },
+  "express": {
+    "head": "18e5985b8a9d5e8423db0a9121f22bdaecd5b120",
+    "describe": "18e5985",
+    "date": "2026-06-15",
+    "n_paths": 12,
+    "unresolved": [
+      "lib/router/index.js",
+      "lib/router/layer.js",
+      "lib/router/route.js"
+    ]
+  },
+  "fastapi": {
+    "head": "1929ac23195136e8616ed1b7c3fd84c65b26d234",
+    "describe": "1929ac2",
+    "date": "2026-06-27",
+    "n_paths": 21,
+    "unresolved": [
+      "fastapi/_compat.py",
+      "tests/test_tutorial/test_first_steps/test_tutorial001.py"
+    ]
+  },
+  "django": {
+    "head": "e78991410b78391bc07a4b5010b273dfec814ff6",
+    "describe": "e789914",
+    "date": "2026-06-26",
+    "n_paths": 66,
+    "unresolved": []
+  },
+  "gin": {
+    "head": "34dac209ffb6ef85cc78c5d217bbb7ad001d68fd",
+    "describe": "34dac20",
+    "date": "2026-06-27",
+    "n_paths": 29,
+    "unresolved": []
+  },
+  "nestjs": {
+    "head": "eef6183961650ed8b5e9f4785d93cc60a9f2d636",
+    "describe": "eef6183",
+    "date": "2026-06-27",
+    "n_paths": 56,
+    "unresolved": []
+  },
+  "spring": {
+    "head": "ce718cf699dde1b35c425f81548a1679566aa63b",
+    "describe": "ce718cf",
+    "date": "2026-06-28",
+    "n_paths": 55,
+    "unresolved": []
+  }
+}

@@ -1,0 +1,556 @@
+{
+  "repo": "fastapi",
+  "repo_url": "https://github.com/tiangolo/fastapi",
+  "commit": "1929ac23195136e8616ed1b7c3fd84c65b26d234",
+  "commit_tag": "1929ac2",
+  "commit_date": "2026-06-27",
+  "annotator": "codebrain-team",
+  "annotation_date": "2026-06-27",
+  "annotation_guidelines": "Ground truth files are those with structural authority over the queried behavior. Files are selected based on dependency centrality, schema ownership, and behavioral control — not textual similarity to the query.",
+  "task_type_distribution": {
+    "what_governs": "40%",
+    "where_is_schema": "25%",
+    "what_breaks": "20%",
+    "is_safe_to_modify": "15%"
+  },
+  "tasks": [
+    {
+      "id": "fastapi-001",
+      "repo": "fastapi",
+      "query": "What file controls how FastAPI applications are created and configured?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["fastapi/applications.py"],
+      "authority_tiers": {"fastapi/applications.py": "ROOT"},
+      "difficulty": "easy",
+      "rationale": "applications.py defines the FastAPI class which is the root object for all API configuration."
+    },
+    {
+      "id": "fastapi-002",
+      "repo": "fastapi",
+      "query": "What governs how path operations (endpoints) are registered and dispatched?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["fastapi/routing.py", "fastapi/applications.py"],
+      "authority_tiers": {"fastapi/routing.py": "ROOT", "fastapi/applications.py": "ROOT"},
+      "difficulty": "easy",
+      "rationale": "routing.py defines APIRouter and APIRoute. applications.py uses APIRouter internally for all route registration."
+    },
+    {
+      "id": "fastapi-003",
+      "repo": "fastapi",
+      "query": "What controls how request body parameters are parsed and validated?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["fastapi/dependencies/utils.py", "fastapi/params.py"],
+      "authority_tiers": {"fastapi/dependencies/utils.py": "ROOT", "fastapi/params.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "dependencies/utils.py resolves parameter types and extracts values. params.py defines Body, Query, Path parameter classes."
+    },
+    {
+      "id": "fastapi-004",
+      "repo": "fastapi",
+      "query": "What governs how dependency injection works in FastAPI?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["fastapi/dependencies/utils.py", "fastapi/dependencies/models.py"],
+      "authority_tiers": {"fastapi/dependencies/utils.py": "ROOT", "fastapi/dependencies/models.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "dependencies/utils.py is the core dependency resolver. models.py defines the Dependant class that represents the dependency tree."
+    },
+    {
+      "id": "fastapi-005",
+      "repo": "fastapi",
+      "query": "What controls how FastAPI generates OpenAPI/Swagger documentation?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["fastapi/openapi/utils.py", "fastapi/applications.py"],
+      "authority_tiers": {"fastapi/openapi/utils.py": "ROOT", "fastapi/applications.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "openapi/utils.py builds the OpenAPI schema dict. applications.py serves it via the openapi() method and docs endpoints."
+    },
+    {
+      "id": "fastapi-006",
+      "repo": "fastapi",
+      "query": "What governs how FastAPI handles authentication and security schemes?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["fastapi/security/oauth2.py", "fastapi/security/api_key.py", "fastapi/security/http.py"],
+      "authority_tiers": {"fastapi/security/oauth2.py": "ROOT", "fastapi/security/api_key.py": "ROOT", "fastapi/security/http.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "Security module defines OAuth2, APIKey, and HTTP security scheme classes that integrate with dependency injection."
+    },
+    {
+      "id": "fastapi-007",
+      "repo": "fastapi",
+      "query": "What controls how response models validate and serialize output data?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["fastapi/routing.py", "fastapi/utils.py"],
+      "authority_tiers": {"fastapi/routing.py": "ROOT", "fastapi/utils.py": "DERIVED"},
+      "difficulty": "hard",
+      "rationale": "routing.py handles response_model processing in get_request_handler. utils.py provides model field generation utilities."
+    },
+    {
+      "id": "fastapi-008",
+      "repo": "fastapi",
+      "query": "What governs how middleware is applied to FastAPI applications?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["fastapi/applications.py", "fastapi/routing.py"],
+      "authority_tiers": {"fastapi/applications.py": "ROOT", "fastapi/routing.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "applications.py add_middleware() delegates to Starlette. routing.py sets up the middleware stack for the ASGI app."
+    },
+    {
+      "id": "fastapi-009",
+      "repo": "fastapi",
+      "query": "What controls how exception handlers process HTTP errors?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["fastapi/exception_handlers.py", "fastapi/applications.py"],
+      "authority_tiers": {"fastapi/exception_handlers.py": "ROOT", "fastapi/applications.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "exception_handlers.py defines default handlers for RequestValidationError and HTTPException. applications.py registers them."
+    },
+    {
+      "id": "fastapi-010",
+      "repo": "fastapi",
+      "query": "What governs how FastAPI resolves Pydantic model schemas for request validation?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["fastapi/dependencies/utils.py", "fastapi/_compat.py"],
+      "authority_tiers": {"fastapi/dependencies/utils.py": "ROOT", "fastapi/_compat.py": "ROOT"},
+      "difficulty": "hard",
+      "rationale": "dependencies/utils.py resolves parameter types. _compat.py handles Pydantic v1/v2 compatibility for model field extraction."
+    },
+    {
+      "id": "fastapi-011",
+      "repo": "fastapi",
+      "query": "What controls how WebSocket connections are handled in FastAPI?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["fastapi/routing.py", "fastapi/applications.py"],
+      "authority_tiers": {"fastapi/routing.py": "ROOT", "fastapi/applications.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "routing.py defines APIWebSocketRoute. applications.py exposes the websocket() decorator."
+    },
+    {
+      "id": "fastapi-012",
+      "repo": "fastapi",
+      "query": "What governs how sub-applications are mounted under path prefixes?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["fastapi/applications.py", "fastapi/routing.py"],
+      "authority_tiers": {"fastapi/applications.py": "ROOT", "fastapi/routing.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "applications.py mount() delegates to the internal router. routing.py handles sub-app ASGI integration."
+    },
+    {
+      "id": "fastapi-013",
+      "repo": "fastapi",
+      "query": "What controls how FastAPI validates path parameters with type annotations?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["fastapi/dependencies/utils.py", "fastapi/params.py"],
+      "authority_tiers": {"fastapi/dependencies/utils.py": "ROOT", "fastapi/params.py": "ROOT"},
+      "difficulty": "hard",
+      "rationale": "dependencies/utils.py inspects function signatures. params.py Path class defines validation constraints."
+    },
+    {
+      "id": "fastapi-014",
+      "repo": "fastapi",
+      "query": "What governs how background tasks are executed after response is sent?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["fastapi/routing.py", "fastapi/background.py"],
+      "authority_tiers": {"fastapi/routing.py": "ROOT", "fastapi/background.py": "DERIVED"},
+      "difficulty": "medium",
+      "rationale": "routing.py handles BackgroundTasks injection and execution after response. background.py re-exports Starlette's BackgroundTasks."
+    },
+    {
+      "id": "fastapi-015",
+      "repo": "fastapi",
+      "query": "What controls how CORS headers are added to FastAPI responses?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["fastapi/applications.py", "fastapi/middleware/cors.py"],
+      "authority_tiers": {"fastapi/applications.py": "ROOT", "fastapi/middleware/cors.py": "DERIVED"},
+      "difficulty": "easy",
+      "rationale": "applications.py add_middleware(CORSMiddleware, ...) configures CORS. The actual middleware is from Starlette."
+    },
+    {
+      "id": "fastapi-016",
+      "repo": "fastapi",
+      "query": "What governs how FastAPI handles file uploads?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["fastapi/datastructures.py", "fastapi/params.py", "fastapi/dependencies/utils.py"],
+      "authority_tiers": {"fastapi/datastructures.py": "ROOT", "fastapi/params.py": "ROOT", "fastapi/dependencies/utils.py": "ROOT"},
+      "difficulty": "hard",
+      "rationale": "datastructures.py defines UploadFile. params.py defines File parameter class. dependencies/utils.py resolves file parameters from multipart requests."
+    },
+    {
+      "id": "fastapi-017",
+      "repo": "fastapi",
+      "query": "What governs how FastAPI startup and shutdown lifecycle events work?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["fastapi/applications.py", "fastapi/routing.py"],
+      "authority_tiers": {"fastapi/applications.py": "ROOT", "fastapi/routing.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "applications.py on_event() and lifespan parameter. routing.py integrates lifespan context managers with the ASGI lifecycle."
+    },
+    {
+      "id": "fastapi-018",
+      "repo": "fastapi",
+      "query": "What controls how the Swagger UI and ReDoc documentation pages are served?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["fastapi/openapi/docs.py", "fastapi/applications.py"],
+      "authority_tiers": {"fastapi/openapi/docs.py": "ROOT", "fastapi/applications.py": "ROOT"},
+      "difficulty": "easy",
+      "rationale": "openapi/docs.py generates the HTML for Swagger UI and ReDoc. applications.py sets up the routes to serve them."
+    },
+    {
+      "id": "fastapi-019",
+      "repo": "fastapi",
+      "query": "What controls how FastAPI handles streaming responses?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["fastapi/responses.py", "fastapi/routing.py"],
+      "authority_tiers": {"fastapi/responses.py": "DERIVED", "fastapi/routing.py": "ROOT"},
+      "difficulty": "hard",
+      "rationale": "responses.py re-exports StreamingResponse from Starlette. routing.py handles the response class selection based on route configuration."
+    },
+    {
+      "id": "fastapi-020",
+      "repo": "fastapi",
+      "query": "What governs how query parameters with default values and optional types work?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["fastapi/dependencies/utils.py", "fastapi/params.py", "fastapi/_compat.py"],
+      "authority_tiers": {"fastapi/dependencies/utils.py": "ROOT", "fastapi/params.py": "ROOT", "fastapi/_compat.py": "ROOT"},
+      "difficulty": "hard",
+      "rationale": "dependencies/utils.py inspects function signatures for defaults. params.py Query class handles constraints. _compat.py handles Optional type detection."
+    },
+    {
+      "id": "fastapi-021",
+      "repo": "fastapi",
+      "query": "Where is the FastAPI application class schema defined?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["fastapi/applications.py"],
+      "authority_tiers": {"fastapi/applications.py": "ROOT"},
+      "difficulty": "easy",
+      "rationale": "applications.py defines the FastAPI class with all constructor parameters, methods, and properties."
+    },
+    {
+      "id": "fastapi-022",
+      "repo": "fastapi",
+      "query": "Where is the APIRouter class defined with its route registration methods?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["fastapi/routing.py"],
+      "authority_tiers": {"fastapi/routing.py": "ROOT"},
+      "difficulty": "easy",
+      "rationale": "routing.py defines APIRouter with add_api_route, get, post, etc."
+    },
+    {
+      "id": "fastapi-023",
+      "repo": "fastapi",
+      "query": "Where are the parameter types (Query, Path, Body, Header, Cookie, Form, File) defined?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["fastapi/params.py"],
+      "authority_tiers": {"fastapi/params.py": "ROOT"},
+      "difficulty": "easy",
+      "rationale": "params.py is the single source of truth for all parameter type classes."
+    },
+    {
+      "id": "fastapi-024",
+      "repo": "fastapi",
+      "query": "Where is the Dependant model (dependency tree node) defined?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["fastapi/dependencies/models.py"],
+      "authority_tiers": {"fastapi/dependencies/models.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "models.py defines the Dependant dataclass that represents a node in the dependency injection tree."
+    },
+    {
+      "id": "fastapi-025",
+      "repo": "fastapi",
+      "query": "Where is the SecurityScopes model defined?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["fastapi/security/oauth2.py"],
+      "authority_tiers": {"fastapi/security/oauth2.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "oauth2.py defines SecurityScopes which is the schema for OAuth2 scope checking in dependencies."
+    },
+    {
+      "id": "fastapi-026",
+      "repo": "fastapi",
+      "query": "Where is the OpenAPI schema generation structure defined?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["fastapi/openapi/utils.py", "fastapi/openapi/models.py"],
+      "authority_tiers": {"fastapi/openapi/utils.py": "ROOT", "fastapi/openapi/models.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "openapi/utils.py generates the schema. openapi/models.py defines the Pydantic models for OpenAPI objects."
+    },
+    {
+      "id": "fastapi-027",
+      "repo": "fastapi",
+      "query": "Where is the HTTPException class defined with its schema?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["fastapi/exceptions.py"],
+      "authority_tiers": {"fastapi/exceptions.py": "ROOT"},
+      "difficulty": "easy",
+      "rationale": "exceptions.py defines HTTPException and RequestValidationError with their fields."
+    },
+    {
+      "id": "fastapi-028",
+      "repo": "fastapi",
+      "query": "Where is the UploadFile schema defined?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["fastapi/datastructures.py"],
+      "authority_tiers": {"fastapi/datastructures.py": "ROOT"},
+      "difficulty": "easy",
+      "rationale": "datastructures.py defines UploadFile with filename, content_type, file, and async methods."
+    },
+    {
+      "id": "fastapi-029",
+      "repo": "fastapi",
+      "query": "Where is the schema for APIRoute defined including response_model handling?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["fastapi/routing.py"],
+      "authority_tiers": {"fastapi/routing.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "routing.py defines APIRoute class with response_model, status_code, dependencies, and all route metadata."
+    },
+    {
+      "id": "fastapi-030",
+      "repo": "fastapi",
+      "query": "Where is the Pydantic compatibility layer schema defined?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["fastapi/_compat.py"],
+      "authority_tiers": {"fastapi/_compat.py": "ROOT"},
+      "difficulty": "hard",
+      "rationale": "_compat.py defines ModelField and compatibility functions that abstract over Pydantic v1/v2 differences."
+    },
+    {
+      "id": "fastapi-031",
+      "repo": "fastapi",
+      "query": "Where is the schema for response classes (JSONResponse, HTMLResponse, etc.) defined?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["fastapi/responses.py"],
+      "authority_tiers": {"fastapi/responses.py": "DERIVED"},
+      "difficulty": "medium",
+      "rationale": "responses.py re-exports and extends Starlette response classes. It is the canonical import point for FastAPI users."
+    },
+    {
+      "id": "fastapi-032",
+      "repo": "fastapi",
+      "query": "Where is the schema for the Depends() function defined?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["fastapi/params.py"],
+      "authority_tiers": {"fastapi/params.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "params.py defines the Depends class that wraps a callable for dependency injection."
+    },
+    {
+      "id": "fastapi-033",
+      "repo": "fastapi",
+      "query": "What files would break if fastapi/routing.py changes the APIRoute constructor signature?",
+      "task_type": "what_breaks",
+      "ground_truth_files": ["fastapi/applications.py", "fastapi/routing.py"],
+      "authority_tiers": {"fastapi/applications.py": "ROOT", "fastapi/routing.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "applications.py creates APIRoute instances via the router. routing.py APIRouter also instantiates APIRoute."
+    },
+    {
+      "id": "fastapi-034",
+      "repo": "fastapi",
+      "query": "What breaks if fastapi/dependencies/utils.py changes how function signatures are inspected?",
+      "task_type": "what_breaks",
+      "ground_truth_files": ["fastapi/routing.py", "fastapi/applications.py", "fastapi/security/oauth2.py"],
+      "authority_tiers": {"fastapi/routing.py": "ROOT", "fastapi/applications.py": "ROOT", "fastapi/security/oauth2.py": "ROOT"},
+      "difficulty": "hard",
+      "rationale": "Every route handler depends on signature inspection. Security schemes depend on it for injecting security params. This is the most critical internal module."
+    },
+    {
+      "id": "fastapi-035",
+      "repo": "fastapi",
+      "query": "What breaks if fastapi/params.py changes the Body class interface?",
+      "task_type": "what_breaks",
+      "ground_truth_files": ["fastapi/dependencies/utils.py", "fastapi/routing.py", "fastapi/openapi/utils.py"],
+      "authority_tiers": {"fastapi/dependencies/utils.py": "ROOT", "fastapi/routing.py": "ROOT", "fastapi/openapi/utils.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "dependencies/utils.py checks for Body instances. routing.py processes body parameters. openapi/utils.py generates body schema."
+    },
+    {
+      "id": "fastapi-036",
+      "repo": "fastapi",
+      "query": "What breaks if fastapi/_compat.py changes the ModelField interface?",
+      "task_type": "what_breaks",
+      "ground_truth_files": ["fastapi/dependencies/utils.py", "fastapi/routing.py", "fastapi/openapi/utils.py", "fastapi/utils.py"],
+      "authority_tiers": {"fastapi/dependencies/utils.py": "ROOT", "fastapi/routing.py": "ROOT", "fastapi/openapi/utils.py": "ROOT", "fastapi/utils.py": "DERIVED"},
+      "difficulty": "hard",
+      "rationale": "_compat.py is the Pydantic abstraction layer. Nearly every module that handles models depends on it."
+    },
+    {
+      "id": "fastapi-037",
+      "repo": "fastapi",
+      "query": "What breaks if fastapi/openapi/utils.py changes the OpenAPI schema output format?",
+      "task_type": "what_breaks",
+      "ground_truth_files": ["fastapi/applications.py", "fastapi/openapi/docs.py"],
+      "authority_tiers": {"fastapi/applications.py": "ROOT", "fastapi/openapi/docs.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "applications.py serves the OpenAPI JSON. docs.py consumes the schema URL for Swagger UI rendering."
+    },
+    {
+      "id": "fastapi-038",
+      "repo": "fastapi",
+      "query": "What breaks if fastapi/exceptions.py changes the RequestValidationError fields?",
+      "task_type": "what_breaks",
+      "ground_truth_files": ["fastapi/exception_handlers.py", "fastapi/routing.py"],
+      "authority_tiers": {"fastapi/exception_handlers.py": "ROOT", "fastapi/routing.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "exception_handlers.py formats RequestValidationError. routing.py raises it during request processing."
+    },
+    {
+      "id": "fastapi-039",
+      "repo": "fastapi",
+      "query": "What breaks if fastapi/applications.py changes how the internal router is created?",
+      "task_type": "what_breaks",
+      "ground_truth_files": ["fastapi/routing.py"],
+      "authority_tiers": {"fastapi/routing.py": "ROOT"},
+      "difficulty": "hard",
+      "rationale": "applications.py creates an APIRouter internally. routing.py is tightly coupled. Changes to router initialization cascade."
+    },
+    {
+      "id": "fastapi-040",
+      "repo": "fastapi",
+      "query": "What breaks if fastapi/__init__.py changes its public exports?",
+      "task_type": "what_breaks",
+      "ground_truth_files": ["fastapi/applications.py", "fastapi/params.py", "fastapi/routing.py", "fastapi/exceptions.py"],
+      "authority_tiers": {"fastapi/applications.py": "ROOT", "fastapi/params.py": "ROOT", "fastapi/routing.py": "ROOT", "fastapi/exceptions.py": "ROOT"},
+      "difficulty": "easy",
+      "rationale": "The __init__.py re-exports the public API. Removing or renaming exports breaks every user import."
+    },
+    {
+      "id": "fastapi-041",
+      "repo": "fastapi",
+      "query": "Is it safe to modify tests/test_tutorial/test_first_steps/test_tutorial001.py?",
+      "task_type": "is_safe_to_modify",
+      "ground_truth_files": ["tests/test_tutorial/test_first_steps/test_tutorial001.py"],
+      "expected_risk": "SAFE",
+      "authority_tiers": {"tests/test_tutorial/test_first_steps/test_tutorial001.py": "LEAF"},
+      "difficulty": "easy",
+      "rationale": "Test files for tutorials are leaf nodes with zero production dependents."
+    },
+    {
+      "id": "fastapi-042",
+      "repo": "fastapi",
+      "query": "Is it safe to modify fastapi/dependencies/utils.py?",
+      "task_type": "is_safe_to_modify",
+      "ground_truth_files": ["fastapi/dependencies/utils.py"],
+      "expected_risk": "REQUIRES_HUMAN_APPROVAL",
+      "authority_tiers": {"fastapi/dependencies/utils.py": "ROOT"},
+      "difficulty": "easy",
+      "rationale": "This is the dependency injection engine. Every route handler depends on it. Maximum blast radius."
+    },
+    {
+      "id": "fastapi-043",
+      "repo": "fastapi",
+      "query": "Is it safe to modify fastapi/openapi/docs.py?",
+      "task_type": "is_safe_to_modify",
+      "ground_truth_files": ["fastapi/openapi/docs.py", "fastapi/applications.py"],
+      "expected_risk": "CAUTION",
+      "authority_tiers": {"fastapi/openapi/docs.py": "DERIVED", "fastapi/applications.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "docs.py generates HTML for docs pages. Changes affect developer experience but not API behavior. Moderate risk."
+    },
+    {
+      "id": "fastapi-044",
+      "repo": "fastapi",
+      "query": "Is it safe to modify fastapi/security/api_key.py?",
+      "task_type": "is_safe_to_modify",
+      "ground_truth_files": ["fastapi/security/api_key.py"],
+      "expected_risk": "CAUTION",
+      "authority_tiers": {"fastapi/security/api_key.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "API key security scheme is used by many applications but has a limited interface surface. Changes need care but blast radius is bounded."
+    },
+    {
+      "id": "fastapi-045",
+      "repo": "fastapi",
+      "query": "Is it safe to modify docs/en/docs/tutorial/first-steps.md?",
+      "task_type": "is_safe_to_modify",
+      "ground_truth_files": ["docs/en/docs/tutorial/first-steps.md"],
+      "expected_risk": "SAFE",
+      "authority_tiers": {"docs/en/docs/tutorial/first-steps.md": "LEAF"},
+      "difficulty": "easy",
+      "rationale": "Documentation files are leaf nodes. No code depends on them."
+    },
+    {
+      "id": "fastapi-046",
+      "repo": "fastapi",
+      "query": "Is it safe to modify fastapi/_compat.py?",
+      "task_type": "is_safe_to_modify",
+      "ground_truth_files": ["fastapi/_compat.py"],
+      "expected_risk": "REQUIRES_HUMAN_APPROVAL",
+      "authority_tiers": {"fastapi/_compat.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "The Pydantic compatibility layer is imported by nearly every module. Breaking it breaks all validation and serialization."
+    },
+    {
+      "id": "fastapi-047",
+      "repo": "fastapi",
+      "query": "Is it safe to modify fastapi/responses.py?",
+      "task_type": "is_safe_to_modify",
+      "ground_truth_files": ["fastapi/responses.py"],
+      "expected_risk": "CAUTION",
+      "authority_tiers": {"fastapi/responses.py": "DERIVED"},
+      "difficulty": "medium",
+      "rationale": "responses.py mostly re-exports from Starlette. Adding new response types is safe; changing existing ones affects users."
+    },
+    {
+      "id": "fastapi-048",
+      "repo": "fastapi",
+      "query": "Is it safe to modify fastapi/applications.py to add a new method?",
+      "task_type": "is_safe_to_modify",
+      "ground_truth_files": ["fastapi/applications.py"],
+      "expected_risk": "CAUTION",
+      "authority_tiers": {"fastapi/applications.py": "ROOT"},
+      "difficulty": "hard",
+      "rationale": "Adding a method is lower risk than changing existing ones, but the FastAPI class is the root object. Name conflicts could break subclasses."
+    },
+    {
+      "id": "fastapi-049",
+      "repo": "fastapi",
+      "query": "What controls how FastAPI handles form data submissions?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["fastapi/params.py", "fastapi/dependencies/utils.py"],
+      "authority_tiers": {"fastapi/params.py": "ROOT", "fastapi/dependencies/utils.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "params.py defines the Form class. dependencies/utils.py handles form field extraction from the request."
+    },
+    {
+      "id": "fastapi-050",
+      "repo": "fastapi",
+      "query": "What governs how FastAPI handles response status codes and their documentation?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["fastapi/routing.py", "fastapi/openapi/utils.py"],
+      "authority_tiers": {"fastapi/routing.py": "ROOT", "fastapi/openapi/utils.py": "ROOT"},
+      "difficulty": "hard",
+      "rationale": "routing.py stores status_code per route. openapi/utils.py generates response documentation with status codes."
+    },
+    {
+      "id": "fastapi-051",
+      "repo": "fastapi",
+      "query": "Where is the schema for how FastAPI tags group endpoints in documentation?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["fastapi/routing.py", "fastapi/openapi/utils.py"],
+      "authority_tiers": {"fastapi/routing.py": "ROOT", "fastapi/openapi/utils.py": "ROOT"},
+      "difficulty": "hard",
+      "rationale": "routing.py stores tags per route. openapi/utils.py aggregates tags into the OpenAPI schema."
+    },
+    {
+      "id": "fastapi-052",
+      "repo": "fastapi",
+      "query": "What controls how FastAPI handles request header parameters?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["fastapi/params.py", "fastapi/dependencies/utils.py"],
+      "authority_tiers": {"fastapi/params.py": "ROOT", "fastapi/dependencies/utils.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "params.py defines Header class. dependencies/utils.py extracts header values with underscore-to-hyphen conversion."
+    },
+    {
+      "id": "fastapi-053",
+      "repo": "fastapi",
+      "query": "What governs how FastAPI handles cookie parameters?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["fastapi/params.py", "fastapi/dependencies/utils.py"],
+      "authority_tiers": {"fastapi/params.py": "ROOT", "fastapi/dependencies/utils.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "params.py defines Cookie class. dependencies/utils.py extracts cookie values from the request."
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "authority": {
+    "thresholds": {
+      "root": 0.8,
+      "derived_upper": 0.7,
+      "derived_lower": 0.3,
+      "leaf": 0.2
+    },
+    "signals": {
+      "in_degree_weight": 0.35,
+      "schema_bonus": 0.2,
+      "churn_penalty_weight": 0.15,
+      "directory_heuristic_weight": 0.15,
+      "out_degree_penalty_weight": 0.15
+    },
+    "directory_overrides": {
+      "root_patterns": [
+        "**/core/**", "**/schema/**", "**/schemas/**",
+        "**/models/**", "**/model/**",
+        "**/config/**", "**/conf/**", "**/settings/**",
+        "**/migrations/**",
+        "**/routing/**", "**/router/**", "**/urls/**",
+        "**/middleware/**",
+        "**/lib/**",
+        "**/app/**", "**/apps/**",
+        "**/base/**", "**/types/**", "**/interfaces/**",
+        "**/db/**", "**/database/**",
+        "**/auth/**", "**/security/**"
+      ],
+      "leaf_patterns": [
+        "**/test/**", "**/tests/**", "**/__tests__/**",
+        "**/scripts/**", "**/examples/**",
+        "**/fixtures/**", "**/mocks/**",
+        "**/docs/**", "**/benchmarks/**",
+        "**/contrib/*/tests/**"
+      ]
+    }
+  },
+  "guard": {
+    "require_human_above": 0.7,
+    "warn_above": 0.3
+  },
+  "scan": {
+    "exclude": ["node_modules", ".git", "dist", "build", "vendor"],
+    "max_file_size_kb": 500
+  }
+}

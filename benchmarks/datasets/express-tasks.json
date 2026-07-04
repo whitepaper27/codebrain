@@ -1,0 +1,556 @@
+{
+  "repo": "express",
+  "repo_url": "https://github.com/expressjs/express",
+  "commit": "18e5985b8a9d5e8423db0a9121f22bdaecd5b120",
+  "commit_tag": "18e5985",
+  "commit_date": "2026-06-15",
+  "annotator": "codebrain-team",
+  "annotation_date": "2026-06-27",
+  "annotation_guidelines": "Ground truth files are those with structural authority over the queried behavior. Files are selected based on dependency centrality, schema ownership, and behavioral control — not textual similarity to the query.",
+  "task_type_distribution": {
+    "what_governs": "40%",
+    "where_is_schema": "25%",
+    "what_breaks": "20%",
+    "is_safe_to_modify": "15%"
+  },
+  "tasks": [
+    {
+      "id": "express-001",
+      "repo": "express",
+      "query": "What file controls how HTTP requests are routed to handlers?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["lib/router/index.js", "lib/router/route.js"],
+      "authority_tiers": {"lib/router/index.js": "ROOT", "lib/router/route.js": "ROOT"},
+      "difficulty": "easy",
+      "rationale": "The router index is the central dispatch mechanism. Route defines individual route matching and method handling."
+    },
+    {
+      "id": "express-002",
+      "repo": "express",
+      "query": "Where is the Express application object created and configured?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["lib/application.js"],
+      "authority_tiers": {"lib/application.js": "ROOT"},
+      "difficulty": "easy",
+      "rationale": "application.js is the core app object that all middleware, routing, and settings hang off of."
+    },
+    {
+      "id": "express-003",
+      "repo": "express",
+      "query": "What governs how response headers and body are sent back to the client?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["lib/response.js"],
+      "authority_tiers": {"lib/response.js": "ROOT"},
+      "difficulty": "easy",
+      "rationale": "response.js extends http.ServerResponse and defines all response methods (send, json, redirect, etc.)."
+    },
+    {
+      "id": "express-004",
+      "repo": "express",
+      "query": "What file processes incoming request data like query strings and URL parameters?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["lib/request.js", "lib/utils.js"],
+      "authority_tiers": {"lib/request.js": "ROOT", "lib/utils.js": "DERIVED"},
+      "difficulty": "medium",
+      "rationale": "request.js augments http.IncomingMessage. utils.js provides parsing helpers used by request processing."
+    },
+    {
+      "id": "express-005",
+      "repo": "express",
+      "query": "What controls the middleware execution pipeline and next() behavior?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["lib/router/index.js", "lib/router/layer.js"],
+      "authority_tiers": {"lib/router/index.js": "ROOT", "lib/router/layer.js": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "Router index manages the middleware stack. Layer wraps individual middleware functions and handles next() dispatch."
+    },
+    {
+      "id": "express-006",
+      "repo": "express",
+      "query": "What governs how Express serves static files?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["lib/express.js"],
+      "authority_tiers": {"lib/express.js": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "express.js re-exports serve-static. The static file serving is delegated to the serve-static package but exposed through the express module."
+    },
+    {
+      "id": "express-007",
+      "repo": "express",
+      "query": "What controls how view engines render templates?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["lib/view.js", "lib/application.js"],
+      "authority_tiers": {"lib/view.js": "ROOT", "lib/application.js": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "view.js handles template engine resolution and rendering. application.js defines the render() method and engine registration."
+    },
+    {
+      "id": "express-008",
+      "repo": "express",
+      "query": "What file governs how Express handles errors in middleware chains?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["lib/router/index.js", "lib/router/layer.js"],
+      "authority_tiers": {"lib/router/index.js": "ROOT", "lib/router/layer.js": "ROOT"},
+      "difficulty": "hard",
+      "rationale": "Error handling middleware (4-arg functions) is detected and dispatched in layer.js. The router index manages error propagation through the stack."
+    },
+    {
+      "id": "express-009",
+      "repo": "express",
+      "query": "What controls how Express negotiates content types for responses?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["lib/response.js", "lib/request.js"],
+      "authority_tiers": {"lib/response.js": "ROOT", "lib/request.js": "ROOT"},
+      "difficulty": "hard",
+      "rationale": "response.js has format() for content negotiation. request.js has accepts() methods. Both delegate to the accepts package."
+    },
+    {
+      "id": "express-010",
+      "repo": "express",
+      "query": "What governs how sub-applications (app.use with another app) are mounted?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["lib/application.js", "lib/router/index.js"],
+      "authority_tiers": {"lib/application.js": "ROOT", "lib/router/index.js": "ROOT"},
+      "difficulty": "hard",
+      "rationale": "application.js handles mount events and path prefix stripping. The router manages sub-app integration into the middleware stack."
+    },
+    {
+      "id": "express-011",
+      "repo": "express",
+      "query": "What governs the order in which route parameters are processed?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["lib/router/index.js", "lib/router/layer.js"],
+      "authority_tiers": {"lib/router/index.js": "ROOT", "lib/router/layer.js": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "Router index manages param() callbacks. Layer handles parameter extraction from URL paths."
+    },
+    {
+      "id": "express-012",
+      "repo": "express",
+      "query": "What governs how Express initializes default settings like 'view engine' and 'env'?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["lib/application.js"],
+      "authority_tiers": {"lib/application.js": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "application.js init() sets all default settings. These defaults propagate to every feature that reads app.get()."
+    },
+    {
+      "id": "express-013",
+      "repo": "express",
+      "query": "What controls how Express determines if a request path matches a route pattern?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["lib/router/layer.js", "lib/router/route.js"],
+      "authority_tiers": {"lib/router/layer.js": "ROOT", "lib/router/route.js": "ROOT"},
+      "difficulty": "hard",
+      "rationale": "Layer uses path-to-regexp to compile route patterns. Route checks HTTP method matching. Together they determine full path+method matching."
+    },
+    {
+      "id": "express-014",
+      "repo": "express",
+      "query": "What file controls how Express exposes its public API when you require('express')?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["lib/express.js", "index.js"],
+      "authority_tiers": {"lib/express.js": "ROOT", "index.js": "ROOT"},
+      "difficulty": "easy",
+      "rationale": "index.js is the package entry. express.js creates the createApplication function and attaches static methods."
+    },
+    {
+      "id": "express-015",
+      "repo": "express",
+      "query": "What governs how trust proxy settings affect client IP detection?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["lib/request.js", "lib/utils.js"],
+      "authority_tiers": {"lib/request.js": "ROOT", "lib/utils.js": "DERIVED"},
+      "difficulty": "hard",
+      "rationale": "request.js reads trust proxy settings to determine req.ip and req.ips. utils.js compiles trust functions."
+    },
+    {
+      "id": "express-016",
+      "repo": "express",
+      "query": "What governs how cookies are set on Express responses?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["lib/response.js"],
+      "authority_tiers": {"lib/response.js": "ROOT"},
+      "difficulty": "easy",
+      "rationale": "response.js defines res.cookie() and res.clearCookie() which handle all cookie serialization and header setting."
+    },
+    {
+      "id": "express-017",
+      "repo": "express",
+      "query": "What governs how JSON request bodies are parsed in Express?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["lib/express.js"],
+      "authority_tiers": {"lib/express.js": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "express.js re-exports body-parser's json middleware as express.json(). The actual parsing is delegated but the exposure point is in express.js."
+    },
+    {
+      "id": "express-018",
+      "repo": "express",
+      "query": "What governs how HTTPS redirects work in Express?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["lib/response.js"],
+      "authority_tiers": {"lib/response.js": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "response.js defines res.redirect() which handles status codes, URL resolution, and the Location header."
+    },
+    {
+      "id": "express-019",
+      "repo": "express",
+      "query": "What governs how Express handles HEAD requests differently from GET requests?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["lib/router/route.js", "lib/router/index.js"],
+      "authority_tiers": {"lib/router/route.js": "ROOT", "lib/router/index.js": "ROOT"},
+      "difficulty": "hard",
+      "rationale": "Route._handles_method checks for HEAD/GET equivalence. The router dispatches HEAD to GET handlers when no explicit HEAD handler exists."
+    },
+    {
+      "id": "express-020",
+      "repo": "express",
+      "query": "What controls how Express sends file downloads with appropriate headers?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["lib/response.js"],
+      "authority_tiers": {"lib/response.js": "ROOT"},
+      "difficulty": "easy",
+      "rationale": "response.js defines res.download() and res.sendFile() which handle Content-Disposition, streaming, and error handling."
+    },
+    {
+      "id": "express-021",
+      "repo": "express",
+      "query": "Where is the Request interface/prototype defined with all its properties?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["lib/request.js"],
+      "authority_tiers": {"lib/request.js": "ROOT"},
+      "difficulty": "easy",
+      "rationale": "request.js defines the req prototype that augments http.IncomingMessage with Express-specific properties."
+    },
+    {
+      "id": "express-022",
+      "repo": "express",
+      "query": "Where is the Response interface/prototype defined?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["lib/response.js"],
+      "authority_tiers": {"lib/response.js": "ROOT"},
+      "difficulty": "easy",
+      "rationale": "response.js defines the res prototype extending http.ServerResponse."
+    },
+    {
+      "id": "express-023",
+      "repo": "express",
+      "query": "Where is the Route class schema defined with its method handlers?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["lib/router/route.js"],
+      "authority_tiers": {"lib/router/route.js": "ROOT"},
+      "difficulty": "easy",
+      "rationale": "route.js defines the Route constructor and its methods property that maps HTTP methods to handler stacks."
+    },
+    {
+      "id": "express-024",
+      "repo": "express",
+      "query": "Where is the Layer constructor that wraps middleware functions defined?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["lib/router/layer.js"],
+      "authority_tiers": {"lib/router/layer.js": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "layer.js defines the Layer object that wraps path, regex, and handler function for each middleware entry."
+    },
+    {
+      "id": "express-025",
+      "repo": "express",
+      "query": "Where is the View class schema that handles template engine integration defined?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["lib/view.js"],
+      "authority_tiers": {"lib/view.js": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "view.js defines the View constructor with name, root, engine, path, and ext properties."
+    },
+    {
+      "id": "express-026",
+      "repo": "express",
+      "query": "Where is the application settings schema defined (default values for env, views, etc.)?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["lib/application.js"],
+      "authority_tiers": {"lib/application.js": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "application.js defaultConfiguration() sets the initial settings map that governs all app behavior."
+    },
+    {
+      "id": "express-027",
+      "repo": "express",
+      "query": "Where are the type definitions for Express published to npm consumers?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["lib/express.js", "index.js"],
+      "authority_tiers": {"lib/express.js": "ROOT", "index.js": "ROOT"},
+      "difficulty": "hard",
+      "rationale": "The public API surface is defined by what express.js exports. TypeScript types come from @types/express (external) but the canonical shape is in express.js."
+    },
+    {
+      "id": "express-028",
+      "repo": "express",
+      "query": "Where is the router prototype defined with route(), use(), and HTTP method functions?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["lib/router/index.js"],
+      "authority_tiers": {"lib/router/index.js": "ROOT"},
+      "difficulty": "easy",
+      "rationale": "Router index defines the proto object with all routing methods that are also mixed into the application."
+    },
+    {
+      "id": "express-029",
+      "repo": "express",
+      "query": "Where is the schema for how Express resolves content negotiation formats defined?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["lib/response.js"],
+      "authority_tiers": {"lib/response.js": "ROOT"},
+      "difficulty": "hard",
+      "rationale": "response.js res.format() defines the negotiation map structure. The accepts package is called but the API contract is in response.js."
+    },
+    {
+      "id": "express-030",
+      "repo": "express",
+      "query": "Where is the cookie options schema (maxAge, httpOnly, secure, etc.) defined?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["lib/response.js"],
+      "authority_tiers": {"lib/response.js": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "response.js res.cookie() documents and processes the options object that controls cookie serialization."
+    },
+    {
+      "id": "express-031",
+      "repo": "express",
+      "query": "Where is the sendFile options schema (root, dotfiles, headers, etc.) defined?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["lib/response.js"],
+      "authority_tiers": {"lib/response.js": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "response.js res.sendFile() accepts and normalizes options before passing to send package."
+    },
+    {
+      "id": "express-032",
+      "repo": "express",
+      "query": "Where is the interface for the params callback (app.param) defined?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["lib/router/index.js"],
+      "authority_tiers": {"lib/router/index.js": "ROOT"},
+      "difficulty": "hard",
+      "rationale": "Router index defines param() which registers callbacks. The callback signature (req, res, next, value, name) is the implicit contract."
+    },
+    {
+      "id": "express-033",
+      "repo": "express",
+      "query": "What files would break if lib/router/index.js is significantly refactored?",
+      "task_type": "what_breaks",
+      "ground_truth_files": ["lib/application.js", "lib/express.js", "lib/router/route.js", "lib/router/layer.js"],
+      "authority_tiers": {"lib/application.js": "ROOT", "lib/express.js": "ROOT", "lib/router/route.js": "ROOT", "lib/router/layer.js": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "application.js creates and uses Router directly. express.js exposes Router. route.js and layer.js are created and managed by the router."
+    },
+    {
+      "id": "express-034",
+      "repo": "express",
+      "query": "What breaks if the response.js res.send() method signature changes?",
+      "task_type": "what_breaks",
+      "ground_truth_files": ["lib/response.js", "lib/application.js"],
+      "authority_tiers": {"lib/response.js": "ROOT", "lib/application.js": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "res.send() is called by res.json(), res.jsonp(), and res.sendStatus() within response.js. application.js render callback uses res.send()."
+    },
+    {
+      "id": "express-035",
+      "repo": "express",
+      "query": "What would break if lib/view.js is removed entirely?",
+      "task_type": "what_breaks",
+      "ground_truth_files": ["lib/application.js"],
+      "authority_tiers": {"lib/application.js": "ROOT"},
+      "difficulty": "easy",
+      "rationale": "application.js requires view.js and uses it in app.render(). No other core file depends on view.js directly."
+    },
+    {
+      "id": "express-036",
+      "repo": "express",
+      "query": "What breaks if lib/application.js changes how app.set() stores settings?",
+      "task_type": "what_breaks",
+      "ground_truth_files": ["lib/request.js", "lib/response.js", "lib/view.js", "lib/router/index.js"],
+      "authority_tiers": {"lib/request.js": "ROOT", "lib/response.js": "ROOT", "lib/view.js": "ROOT", "lib/router/index.js": "ROOT"},
+      "difficulty": "hard",
+      "rationale": "Multiple files read settings via req.app.get(). request.js reads trust proxy, response.js reads etag, view.js reads views directory, router reads case sensitive routing."
+    },
+    {
+      "id": "express-037",
+      "repo": "express",
+      "query": "What breaks if the Layer constructor changes how it stores the handle function?",
+      "task_type": "what_breaks",
+      "ground_truth_files": ["lib/router/index.js", "lib/router/route.js"],
+      "authority_tiers": {"lib/router/index.js": "ROOT", "lib/router/route.js": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "Both router index and route create Layer instances and depend on layer.handle being a function reference."
+    },
+    {
+      "id": "express-038",
+      "repo": "express",
+      "query": "What breaks if lib/utils.js changes the etag generation logic?",
+      "task_type": "what_breaks",
+      "ground_truth_files": ["lib/response.js", "lib/application.js"],
+      "authority_tiers": {"lib/response.js": "ROOT", "lib/application.js": "ROOT"},
+      "difficulty": "hard",
+      "rationale": "application.js registers default etag function from utils. response.js calls the etag function when sending responses."
+    },
+    {
+      "id": "express-039",
+      "repo": "express",
+      "query": "What breaks if lib/request.js changes how req.params is populated?",
+      "task_type": "what_breaks",
+      "ground_truth_files": ["lib/router/layer.js", "lib/router/index.js"],
+      "authority_tiers": {"lib/router/layer.js": "ROOT", "lib/router/index.js": "ROOT"},
+      "difficulty": "hard",
+      "rationale": "Layer.match() populates params from path-to-regexp captures. Router index merges parent params. Changing how params are set affects all route handlers."
+    },
+    {
+      "id": "express-040",
+      "repo": "express",
+      "query": "What would break if the Route.prototype.dispatch method is changed?",
+      "task_type": "what_breaks",
+      "ground_truth_files": ["lib/router/index.js"],
+      "authority_tiers": {"lib/router/index.js": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "Router index creates routes and relies on dispatch() being the layer handle for route layers."
+    },
+    {
+      "id": "express-041",
+      "repo": "express",
+      "query": "What breaks if the express.js module changes which packages it re-exports?",
+      "task_type": "what_breaks",
+      "ground_truth_files": ["index.js"],
+      "authority_tiers": {"index.js": "ROOT"},
+      "difficulty": "easy",
+      "rationale": "index.js is the sole entry point and re-exports express.js. Any change to express.js exports affects the public API consumed by every user."
+    },
+    {
+      "id": "express-042",
+      "repo": "express",
+      "query": "Is it safe to modify test/app.listen.js?",
+      "task_type": "is_safe_to_modify",
+      "ground_truth_files": ["test/app.listen.js"],
+      "expected_risk": "SAFE",
+      "authority_tiers": {"test/app.listen.js": "LEAF"},
+      "difficulty": "easy",
+      "rationale": "Test files are leaf nodes. No other file depends on them. Changes have zero blast radius on production code."
+    },
+    {
+      "id": "express-043",
+      "repo": "express",
+      "query": "Is it safe to modify lib/application.js?",
+      "task_type": "is_safe_to_modify",
+      "ground_truth_files": ["lib/application.js"],
+      "expected_risk": "REQUIRES_HUMAN_APPROVAL",
+      "authority_tiers": {"lib/application.js": "ROOT"},
+      "difficulty": "easy",
+      "rationale": "application.js is the root authority. Every Express app depends on it. Changes here have maximum blast radius."
+    },
+    {
+      "id": "express-044",
+      "repo": "express",
+      "query": "Is it safe to modify lib/router/layer.js?",
+      "task_type": "is_safe_to_modify",
+      "ground_truth_files": ["lib/router/layer.js", "lib/router/index.js", "lib/router/route.js"],
+      "expected_risk": "REQUIRES_HUMAN_APPROVAL",
+      "authority_tiers": {"lib/router/layer.js": "ROOT", "lib/router/index.js": "ROOT", "lib/router/route.js": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "Layer is used by both Router and Route. It is the atomic unit of middleware dispatch. Changes affect all routing behavior."
+    },
+    {
+      "id": "express-045",
+      "repo": "express",
+      "query": "Is it safe to modify lib/view.js?",
+      "task_type": "is_safe_to_modify",
+      "ground_truth_files": ["lib/view.js", "lib/application.js"],
+      "expected_risk": "CAUTION",
+      "authority_tiers": {"lib/view.js": "ROOT", "lib/application.js": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "view.js is only required by application.js. Blast radius is limited to template rendering. Lower risk than router or response changes."
+    },
+    {
+      "id": "express-046",
+      "repo": "express",
+      "query": "Is it safe to modify examples/hello-world/index.js?",
+      "task_type": "is_safe_to_modify",
+      "ground_truth_files": ["examples/hello-world/index.js"],
+      "expected_risk": "SAFE",
+      "authority_tiers": {"examples/hello-world/index.js": "LEAF"},
+      "difficulty": "easy",
+      "rationale": "Example files are leaves. No production code depends on them."
+    },
+    {
+      "id": "express-047",
+      "repo": "express",
+      "query": "Is it safe to modify lib/utils.js?",
+      "task_type": "is_safe_to_modify",
+      "ground_truth_files": ["lib/utils.js", "lib/application.js", "lib/request.js", "lib/response.js"],
+      "expected_risk": "CAUTION",
+      "authority_tiers": {"lib/utils.js": "DERIVED", "lib/application.js": "ROOT", "lib/request.js": "ROOT", "lib/response.js": "ROOT"},
+      "difficulty": "hard",
+      "rationale": "utils.js is imported by application, request, and response. It provides etag, content-type, and trust proxy compilation. Changes propagate indirectly."
+    },
+    {
+      "id": "express-048",
+      "repo": "express",
+      "query": "Is it safe to modify lib/response.js to add a new method?",
+      "task_type": "is_safe_to_modify",
+      "ground_truth_files": ["lib/response.js"],
+      "expected_risk": "CAUTION",
+      "authority_tiers": {"lib/response.js": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "Adding a new method to response is lower risk than modifying existing methods, but response.js is a root file. New methods could conflict with user-defined properties."
+    },
+    {
+      "id": "express-049",
+      "repo": "express",
+      "query": "Is it safe to modify lib/express.js to change the default exports?",
+      "task_type": "is_safe_to_modify",
+      "ground_truth_files": ["lib/express.js", "index.js"],
+      "expected_risk": "REQUIRES_HUMAN_APPROVAL",
+      "authority_tiers": {"lib/express.js": "ROOT", "index.js": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "Changing exports of the entry module is a breaking change for every consumer. Maximum blast radius."
+    },
+    {
+      "id": "express-050",
+      "repo": "express",
+      "query": "What controls how Express handles the 'etag' setting for caching?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["lib/application.js", "lib/response.js", "lib/utils.js"],
+      "authority_tiers": {"lib/application.js": "ROOT", "lib/response.js": "ROOT", "lib/utils.js": "DERIVED"},
+      "difficulty": "hard",
+      "rationale": "application.js sets the default etag function via utils.compileETag. response.js calls the etag function during res.send(). Three files collaborate on this feature."
+    },
+    {
+      "id": "express-051",
+      "repo": "express",
+      "query": "Where is the schema for route method definitions (get, post, put, delete, etc.)?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["lib/router/route.js", "lib/application.js"],
+      "authority_tiers": {"lib/router/route.js": "ROOT", "lib/application.js": "ROOT"},
+      "difficulty": "hard",
+      "rationale": "Both Route and application dynamically generate HTTP method functions from the methods package. The schema is implicit in the iteration over http.METHODS."
+    },
+    {
+      "id": "express-052",
+      "repo": "express",
+      "query": "What controls how Express detects and handles JSONP requests?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["lib/response.js", "lib/application.js"],
+      "authority_tiers": {"lib/response.js": "ROOT", "lib/application.js": "ROOT"},
+      "difficulty": "hard",
+      "rationale": "response.js implements res.jsonp() which reads the jsonp callback setting from application settings."
+    },
+    {
+      "id": "express-053",
+      "repo": "express",
+      "query": "What breaks if package.json changes the 'main' entry point?",
+      "task_type": "what_breaks",
+      "ground_truth_files": ["index.js", "lib/express.js"],
+      "authority_tiers": {"index.js": "ROOT", "lib/express.js": "ROOT"},
+      "difficulty": "easy",
+      "rationale": "package.json main field determines what require('express') resolves to. Changing it breaks every consumer import."
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+% Worked authority scoring example for CodeBrain paper
+% Include in main.tex with: \input{figures/authority-example}
+%
+% This figure shows a small dependency graph with authority scores,
+% illustrating how ROOT, DERIVED, and LEAF files differ.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+    node distance=1.5cm and 2cm,
+    root/.style={circle, draw, thick, fill=red!15, minimum size=1.2cm, align=center, font=\scriptsize},
+    derived/.style={circle, draw, fill=yellow!15, minimum size=1.2cm, align=center, font=\scriptsize},
+    leaf/.style={circle, draw, fill=green!15, minimum size=1.2cm, align=center, font=\scriptsize},
+    arrow/.style={-{Stealth[length=2mm]}, gray},
+    scorelabel/.style={font=\scriptsize\bfseries, text=black}
+]
+
+% ROOT nodes
+\node[root] (schema) {db/\\schema};
+\node[root, right=2.5cm of schema] (config) {core/\\config};
+
+% DERIVED nodes
+\node[derived, below left=1.2cm and 0.5cm of schema] (service) {services/\\user};
+\node[derived, below right=1.2cm and 0.5cm of schema] (api) {api/\\users};
+\node[derived, below=1.2cm of config] (auth) {services/\\auth};
+
+% LEAF nodes
+\node[leaf, below=1.2cm of service] (test1) {tests/\\user.test};
+\node[leaf, below=1.2cm of api] (test2) {tests/\\api.test};
+
+% Dependency edges (arrow = "imports from" / "depends on")
+\draw[arrow] (service) -- (schema);
+\draw[arrow] (api) -- (schema);
+\draw[arrow] (auth) -- (schema);
+\draw[arrow] (api) -- (service);
+\draw[arrow] (auth) -- (config);
+\draw[arrow] (service) -- (config);
+\draw[arrow] (test1) -- (service);
+\draw[arrow] (test2) -- (api);
+
+% Authority scores
+\node[scorelabel, above=0.05cm of schema] {$\mathcal{A}=0.92$};
+\node[scorelabel, above=0.05cm of config] {$\mathcal{A}=0.87$};
+\node[scorelabel, left=0.05cm of service, anchor=east] {$\mathcal{A}=0.51$};
+\node[scorelabel, right=0.05cm of api, anchor=west] {$\mathcal{A}=0.42$};
+\node[scorelabel, right=0.05cm of auth, anchor=west] {$\mathcal{A}=0.38$};
+\node[scorelabel, below=0.05cm of test1] {$\mathcal{A}=0.05$};
+\node[scorelabel, below=0.05cm of test2] {$\mathcal{A}=0.08$};
+
+% Legend
+\matrix[draw, anchor=north east, column sep=0.3cm, row sep=0.1cm, font=\scriptsize]
+  at (current bounding box.south east) {
+    \node[root, minimum size=0.4cm] {}; & \node{ROOT ($\geq 0.8$)}; \\
+    \node[derived, minimum size=0.4cm] {}; & \node{DERIVED ($0.3$--$0.8$)}; \\
+    \node[leaf, minimum size=0.4cm] {}; & \node{LEAF ($< 0.3$)}; \\
+};
+
+\end{tikzpicture}
+\caption{Worked example of authority scoring on a small web application. Arrows indicate ``depends on'' relationships. The database schema and core configuration are ROOT files (high in-degree, low out-degree). Service and API files are DERIVED (moderate authority). Test files are LEAF (no dependents). A flat retrieval query for ``user management'' might rank all files containing ``user'' equally; authority-aware retrieval ranks the schema first.}
+\label{fig:authority-example}
+\end{figure}

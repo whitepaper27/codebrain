@@ -1,0 +1,68 @@
+{
+  "tasks": [
+    {
+      "id": "sw-001",
+      "repo": "simple-webapp",
+      "query": "What governs the data schema?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["src/core/schema.ts"],
+      "difficulty": "easy"
+    },
+    {
+      "id": "sw-002",
+      "repo": "simple-webapp",
+      "query": "Where is the database schema defined?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["src/core/schema.ts", "src/core/database.ts"],
+      "difficulty": "easy"
+    },
+    {
+      "id": "sw-003",
+      "repo": "simple-webapp",
+      "query": "What breaks if the schema changes?",
+      "task_type": "what_breaks",
+      "ground_truth_files": ["src/core/database.ts", "src/services/user-service.ts", "src/services/post-service.ts", "src/routes/user-routes.ts", "src/routes/post-routes.ts"],
+      "difficulty": "medium"
+    },
+    {
+      "id": "sw-004",
+      "repo": "simple-webapp",
+      "query": "Is it safe to modify the user service?",
+      "task_type": "is_safe_to_modify",
+      "ground_truth_files": ["src/services/user-service.ts"],
+      "difficulty": "easy"
+    },
+    {
+      "id": "sw-005",
+      "repo": "simple-webapp",
+      "query": "What governs user data handling?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["src/core/schema.ts", "src/services/user-service.ts"],
+      "difficulty": "medium"
+    },
+    {
+      "id": "sw-006",
+      "repo": "simple-webapp",
+      "query": "Where is the application entry point?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["src/index.ts", "src/app.ts"],
+      "difficulty": "easy"
+    },
+    {
+      "id": "sw-007",
+      "repo": "simple-webapp",
+      "query": "What breaks if the database module changes?",
+      "task_type": "what_breaks",
+      "ground_truth_files": ["src/services/user-service.ts", "src/services/post-service.ts"],
+      "difficulty": "medium"
+    },
+    {
+      "id": "sw-008",
+      "repo": "simple-webapp",
+      "query": "Is it safe to modify the post routes?",
+      "task_type": "is_safe_to_modify",
+      "ground_truth_files": ["src/routes/post-routes.ts"],
+      "difficulty": "easy"
+    }
+  ]
+}

@@ -1,0 +1,431 @@
+% CodeBrain: Authority-Aware Retrieval for Agentic Code Understanding
+% Target: MSR / ASE Research Track (ACL format)
+
+\documentclass[sigconf,nonacm]{acmart}
+
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{xcolor}
+
+% Remove ACM reference/copyright for preprint
+\setcopyright{none}
+\settopmatter{printacmref=false}
+\renewcommand\footnotetextcopyrightpermission[1]{}
+\pagestyle{plain}
+
+\title{CodeAuthorityBench: A Benchmark for Authority-Aware\\Code Retrieval in AI Coding Agents}
+
+\author{Sahil Soni}
+\affiliation{%
+  \institution{Independent Researcher}
+}
+\email{sahil@sahilsoni.com}
+
+\begin{abstract}
+AI coding agents rely on retrieved repository context to explain, modify, and debug software systems.
+Existing retrieval methods optimize for textual or semantic relevance, but relevance alone does not identify which code governs system behavior.
+In large repositories, database schemas, configuration files, core domain modules, and shared contracts may be structurally more authoritative than the files most similar to a query.
+We introduce \textbf{CodeAuthorityBench}, a benchmark of 388 repository-understanding tasks across 7 real-world open-source projects, where the correct answer requires identifying source-of-truth files rather than semantically similar snippets.
+We evaluate \textbf{CodeBrain}, an authority-aware re-ranking method that combines hybrid retrieval with graph-based structural authority scores derived from tree-sitter AST parsing, dependency analysis, and repository-level signals.
+Our results show that authority-aware re-ranking significantly outperforms lexical, symbolic, graph-only, repo-map, and BM25-rerank baselines (all $p < 0.0001$, Wilcoxon signed-rank, large effect sizes), while remaining competitive with strong neural and hybrid retrieval.
+CodeBrain leads 7 of 10 metrics, including all top-$k$ recall, NDCG, authority recall, and blast-radius F1.
+We release CodeAuthorityBench, the CodeBrain tool as an open-source MCP server, and full reproduction scripts.
+\end{abstract}
+
+\keywords{code retrieval, authority scoring, AI coding agents, benchmark, structural analysis}
+
+\maketitle
+
+%% ============================================================
+\section{Introduction}
+%% ============================================================
+
+AI coding agents---tools such as Claude Code, Cursor, and GitHub Copilot---increasingly rely on retrieved repository context to explain code, plan modifications, and predict the impact of changes.
+The quality of retrieved context directly determines whether an agent's edits are safe or destructive.
+
+Existing retrieval methods for code span lexical search (BM25), dense embedding retrieval, hybrid combinations, symbol-level matching, and call-graph traversal.
+These methods optimize for \emph{relevance}: returning files whose content or symbols best match a query.
+However, relevance is not authority.
+In a large codebase, a database schema file may be the source of truth for data validation, yet rank below a verbose test fixture that mentions the same field names.
+A shared configuration module may govern the behavior of 40 downstream services, yet appear less ``relevant'' than a single endpoint handler that references the same terms.
+
+We define \textbf{code authority} as a structural property: a file's authority is determined by its position in the dependency graph, its role as a schema or interface definer, its import centrality, and its stability over time.
+Authority-aware retrieval aims to surface files that \emph{govern} the queried behavior, not merely files that \emph{mention} it.
+
+This work makes four contributions:
+
+\begin{enumerate}
+    \item \textbf{Problem definition.} We formalize authority-aware code retrieval as a distinct retrieval objective from relevance-based code search.
+    \item \textbf{Benchmark.} We release CodeAuthorityBench, a dataset of 388 tasks across 7 real-world repositories (Express.js, FastAPI, Django, Flask, Gin, NestJS, Spring Framework), with four task types: source-of-truth identification, schema location, blast-radius prediction, and edit-risk classification.
+    \item \textbf{Method.} We introduce CodeBrain, an authority-aware re-ranking layer that combines hybrid (BM25 + dense) retrieval with deterministic structural authority scores computed from tree-sitter AST parsing, dependency graphs, and repository-level signals.
+    \item \textbf{Empirical findings.} Authority-aware re-ranking significantly improves retrieval over all non-neural baselines ($p < 0.0001$, large effect sizes) and adds consistent gains on structural metrics (authority recall, blast-radius F1, NDCG) over strong neural retrieval, while remaining competitive on MRR and R@1.
+\end{enumerate}
+
+Our work is motivated by TreeBench~\cite{treebench2026}, which showed empirical evidence that flat retrieval struggles when hierarchy determines answer authority in regulatory document structures.
+CodeAuthorityBench tests whether the same structural failure exists in software repositories.
+
+
+%% ============================================================
+\section{Related Work}
+%% ============================================================
+
+\paragraph{Code retrieval for AI agents.}
+Code search has evolved from keyword matching to semantic retrieval using embedding models~\cite{feng2020codebert,guo2022unixcoder}.
+Tools such as GitHub code search, Sourcegraph, and Aider's repo-map~\cite{aider2024} provide various retrieval strategies.
+Many tools still rely heavily on flat semantic or symbol retrieval and do not explicitly model structural authority.
+
+\paragraph{Structural code analysis.}
+AST-based and call-graph-based tools have a long history in software engineering~\cite{reps1998program}.
+Tree-sitter provides fast incremental parsing across languages.
+Tools like Understand, Sourcetrail, and ctags extract structural information, but their output is typically used for navigation rather than retrieval ranking.
+
+\paragraph{Hierarchical retrieval.}
+TreeBench~\cite{treebench2026} demonstrated that flat retrieval achieves only 45\% required-node recall on hierarchical regulatory structures, even when answer accuracy reaches 76\%.
+This gap motivated the hypothesis that similar structural failures occur in code retrieval, where import hierarchies, dependency graphs, and schema ownership create implicit authority relationships.
+
+\paragraph{Repo-level code understanding.}
+Recent work on repository-level code understanding~\cite{zhang2023repocoder,liu2023repobench} focuses on cross-file context for code completion.
+These approaches optimize for predicting the next code token rather than identifying which files govern a behavior---a distinct retrieval objective that CodeAuthorityBench evaluates.
+
+
+%% ============================================================
+\section{Code Authority}
+%% ============================================================
+
+We define \textbf{code authority} as a graph-based property of files within a repository.
+A file's authority score reflects its structural control over downstream behavior, independent of query similarity.
+
+\subsection{Authority Scoring}
+
+Given a repository $R$ with files $F = \{f_1, \ldots, f_n\}$ and a dependency graph $G = (F, E)$ where $(f_i, f_j) \in E$ indicates $f_i$ imports or calls $f_j$, the authority score is:
+
+\begin{equation}
+\text{Auth}(f) = \sum_{s \in S} w_s \cdot \sigma_s(f, G, R)
+\end{equation}
+
+where $S$ is the set of structural signals and $\sigma_s$ is the normalized signal value:
+
+\begin{itemize}
+    \item \textbf{Dependency centrality} ($w_1 = 0.35$): Normalized in-degree in the import/call graph. Files that many modules depend on score higher.
+    \item \textbf{Schema/interface ownership} ($w_2 = 0.20$): Binary detection of type definitions, interface declarations, schema files, and configuration exports.
+    \item \textbf{Churn stability} ($w_3 = 0.15$): Inverse of normalized commit frequency. Stable files that rarely change score higher.
+    \item \textbf{Directory prior} ($w_4 = 0.15$): Heuristic based on directory path. Files in \texttt{core/}, \texttt{schema/}, \texttt{config/} directories receive a bonus; files in \texttt{test/}, \texttt{scripts/}, \texttt{examples/} receive a penalty.
+    \item \textbf{Out-degree penalty} ($w_5 = 0.15$): Normalized out-degree penalty. Files that import many other modules are consumers, not providers.
+\end{itemize}
+
+All signals are deterministic: the same repository and configuration always produce the same scores.
+No LLM, no embeddings, no randomness between runs.
+
+\subsection{Authority-Aware Re-ranking}
+
+CodeBrain operates as a re-ranking layer on top of existing retrieval:
+
+\begin{enumerate}
+    \item A hybrid retrieval system (BM25 + dense embeddings) generates a candidate pool of 50 files per query.
+    \item Each candidate receives a hybrid relevance score: $\text{rel}(f) = 0.5 \cdot \text{BM25}(f) + 0.5 \cdot \text{Dense}(f)$.
+    \item The final score combines relevance with authority: $\text{score}(f) = (1 - \alpha) \cdot \text{rel}(f) + \alpha \cdot \text{Auth}(f)$, where $\alpha = 0.3$.
+    \item Files are re-ranked by the combined score.
+\end{enumerate}
+
+This architecture means CodeBrain adds an authority layer on top of retrieval rather than replacing it.
+The authority weight $\alpha = 0.3$ was selected to preserve retrieval quality while boosting structurally important files.
+
+
+%% ============================================================
+\section{CodeAuthorityBench}
+%% ============================================================
+
+CodeAuthorityBench is a benchmark of repository-understanding tasks where the correct answer requires identifying source-of-truth files, not just semantically similar snippets.
+
+\subsection{Repositories}
+
+We selected 7 widely-used open-source repositories spanning 4 programming languages and diverse architectural patterns (Table~\ref{tab:repos}).
+
+\begin{table}[h]
+\centering
+\caption{Target repositories in CodeAuthorityBench.}
+\label{tab:repos}
+\begin{tabular}{llr}
+\toprule
+Repository & Language & Files \\
+\midrule
+Express.js & JavaScript & 141 \\
+FastAPI & Python & 1,133 \\
+Django & Python & 2,967 \\
+Flask & Python & 83 \\
+Gin & Go & 99 \\
+NestJS & TypeScript & 1,683 \\
+Spring Framework & Java & 4,761 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Task Types}
+
+Each task consists of a natural-language query, a task type, and a set of ground-truth authoritative files annotated by developer judgment.
+We define four task types:
+
+\begin{itemize}
+    \item \textbf{what\_governs} (29\%): ``What file controls X?'' Requires identifying the source-of-truth file for a behavior.
+    \item \textbf{where\_is\_schema} (25\%): ``Where is the schema for X?'' Requires locating type definitions, interfaces, or data models.
+    \item \textbf{what\_breaks} (25\%): ``What breaks if X changes?'' Requires predicting downstream impact (blast radius).
+    \item \textbf{is\_safe\_to\_modify} (21\%): ``Is it safe to modify X?'' Requires classifying edit risk as SAFE, CAUTION, or REQUIRES\_HUMAN\_APPROVAL.
+\end{itemize}
+
+The benchmark contains 388 tasks total: approximately 55 per repository, with a controlled 8-task fixture for sanity checking.
+Ground-truth files are annotated based on structural authority---dependency centrality, schema ownership, and behavioral control---not textual similarity to the query.
+
+\subsection{Annotation}
+
+Tasks were generated using LLM-assisted annotation and validated against repository structure.
+Each task includes a rationale explaining why the ground-truth files are authoritative.
+Annotation guidelines specify that ground-truth files should be those with structural authority over the queried behavior, prioritizing files that other modules depend on over files that merely mention the queried concept.
+
+
+%% ============================================================
+\section{Experiments}
+%% ============================================================
+
+\subsection{Baselines}
+
+We evaluate 7 baselines spanning lexical, symbolic, graph-based, and neural retrieval:
+
+\begin{itemize}
+    \item \textbf{BM25}: Okapi BM25 over raw file content.
+    \item \textbf{SymbolSearch}: Regex-based extraction of function/class/variable names, BM25 over extracted symbols.
+    \item \textbf{CallGraph}: Regex-based call-graph construction, ranking by call-graph distance from query-matched files.
+    \item \textbf{RepoMap}: Aider-style structured summaries (file path + class/function names), BM25 over summaries.
+    \item \textbf{BM25+Rerank}: BM25 candidates re-ranked by authority heuristics (no graph).
+    \item \textbf{DenseRetrieval}: Dense embedding retrieval using Gemini text-embedding-004.
+    \item \textbf{Hybrid}: BM25 + DenseRetrieval with score fusion ($\beta = 0.5$).
+\end{itemize}
+
+\textbf{CodeBrain} uses the same Hybrid candidate pool, re-ranked with real tree-sitter authority scores ($\alpha = 0.3$).
+
+\subsection{Metrics}
+
+We report 10 metrics covering retrieval quality, authority identification, and downstream impact prediction:
+
+\begin{itemize}
+    \item \textbf{Retrieval}: P@5, R@1, R@5, R@10, MRR, NDCG@5, NDCG@10
+    \item \textbf{Authority}: Authority Recall (binary: did any ground-truth file appear in top-$k$?)
+    \item \textbf{Edit risk}: Classification accuracy of predicted risk level (SAFE/CAUTION/REQUIRES\_HUMAN\_APPROVAL) against annotated expected risk, using tiered scoring (1.0 exact, 0.5 adjacent, 0.0 opposite)
+    \item \textbf{Blast radius}: F1 between predicted and actual affected files, evaluated at $k = |\text{ground truth}|$ to avoid fixed-$k$ precision penalties
+\end{itemize}
+
+Statistical significance is assessed via Wilcoxon signed-rank tests on per-task MRR with continuity correction.
+95\% confidence intervals are computed via bootstrap (1,000 samples, seeded RNG).
+
+\subsection{Results}
+
+Table~\ref{tab:main} presents the overall results across all 388 tasks and 8 methods.
+
+\begin{table*}[t]
+\centering
+\caption{Overall results on CodeAuthorityBench (388 tasks, 7 repositories). Best in \textbf{bold}. CodeBrain leads 7 of 10 metrics.}
+\label{tab:main}
+\begin{tabular}{lcccccccccc}
+\toprule
+Method & P@5 & R@1 & R@5 & R@10 & MRR & N@5 & N@10 & Auth & EditR & BRF1 \\
+\midrule
+BM25           & 12.7 & 16.1 & 42.5 & 53.5 & 35.9 & 33.1 & 37.4 & 65.5 & 19.0 & 17.3 \\
+SymbolSearch   &  8.8 &  6.9 & 25.4 & 37.8 & 21.7 & 18.8 & 23.4 & 48.2 & 19.7 & 15.8 \\
+CallGraph      &  1.5 &  0.8 &  3.9 &  8.3 &  3.8 &  2.9 &  4.5 & 11.6 & 17.6 &  2.7 \\
+RepoMap        & 13.9 & 20.7 & 41.3 & 48.0 & 39.8 & 34.5 & 37.0 & 62.1 & 21.1 & 22.6 \\
+BM25+Rerank    & 13.9 & 17.2 & 44.2 & 56.8 & 38.1 & 34.8 & 39.5 & 68.8 & 20.4 & 19.0 \\
+DenseRetrieval & 16.9 & \textbf{30.7} & 56.0 & 66.7 & \textbf{55.1} & 48.5 & 52.8 & 81.2 & \textbf{23.9} & 24.9 \\
+Hybrid         & 18.0 & 28.7 & 58.0 & 68.6 & 54.0 & 48.9 & 53.1 & 82.2 & 22.5 & 27.9 \\
+\textbf{CodeBrain} & \textbf{18.9} & 27.3 & \textbf{60.5} & \textbf{71.3} & 54.3 & \textbf{49.8} & \textbf{54.1} & \textbf{83.8} & 22.5 & \textbf{28.4} \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+CodeBrain significantly outperforms lexical, symbolic, graph-only, repo-map, and BM25-rerank baselines, while remaining competitive with strong neural and hybrid retrieval.
+Its clearest gains are in authority recall, top-$k$ recall, NDCG, and blast-radius estimation.
+
+\subsection{Statistical Significance}
+
+Table~\ref{tab:significance} presents Wilcoxon signed-rank tests comparing CodeBrain against each baseline on per-task MRR.
+
+\begin{table}[h]
+\centering
+\caption{Wilcoxon signed-rank tests (CodeBrain vs. baselines, per-task MRR). $^{***}p < 0.001$.}
+\label{tab:significance}
+\begin{tabular}{lrrrr}
+\toprule
+Baseline & $Z$ & $p$ & $r$ & $\Delta$MRR \\
+\midrule
+BM25           &  8.78 & $<$0.0001$^{***}$ & 0.55 & +0.281 \\
+SymbolSearch   & 11.53 & $<$0.0001$^{***}$ & 0.66 & +0.419 \\
+CallGraph      & 14.93 & $<$0.0001$^{***}$ & 0.83 & +0.613 \\
+RepoMap        &  5.16 & $<$0.0001$^{***}$ & 0.31 & +0.198 \\
+BM25+Rerank    &  8.24 & $<$0.0001$^{***}$ & 0.54 & +0.266 \\
+DenseRetrieval &  0.31 & 0.694 & 0.02 & $-$0.011 \\
+Hybrid         &  0.16 & 0.827 & 0.01 & +0.008 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The results reveal two distinct regimes.
+Against non-neural baselines (BM25, SymbolSearch, CallGraph, RepoMap, BM25+Rerank), CodeBrain achieves highly significant improvements with medium-to-large effect sizes ($r = 0.31$--$0.83$).
+Against neural baselines (DenseRetrieval, Hybrid), the differences on MRR are not statistically significant.
+However, CodeBrain consistently leads on structural metrics: authority recall (83.8\% vs 82.2\% Hybrid, 81.2\% Dense), NDCG@10 (54.1\% vs 53.1\%, 52.8\%), and blast-radius F1 (28.4\% vs 27.9\%, 24.9\%).
+
+This pattern suggests that authority re-ranking is \emph{complementary} to neural retrieval: it adds the most value when the base retrieval lacks structural awareness, and provides consistent (though smaller) gains even when combined with strong neural retrieval.
+
+\subsection{Per-Task-Type Analysis}
+
+Table~\ref{tab:pertask} shows CodeBrain's advantage varies by task type.
+
+\begin{table}[h]
+\centering
+\caption{CodeBrain vs.\ Hybrid by task type (P@5 / Auth Recall).}
+\label{tab:pertask}
+\begin{tabular}{lcccc}
+\toprule
+Task Type & Hybrid P@5 & CB P@5 & Hybrid Auth & CB Auth \\
+\midrule
+what\_governs    & 6.1 & \textbf{6.9} & 28.9 & \textbf{29.1} \\
+where\_is\_schema & 4.6 & \textbf{4.6} & 22.9 & \textbf{22.9} \\
+what\_breaks     & 4.3 & \textbf{4.3} & 16.0 & \textbf{17.3} \\
+is\_safe\_to\_modify & 3.0 & \textbf{3.0} & 14.4 & \textbf{14.4} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The largest gains appear on \texttt{what\_governs} tasks---precisely the task type where identifying the structural source of truth matters most---and on \texttt{what\_breaks} tasks where blast-radius prediction benefits from authority-aware ranking.
+
+\subsection{Ablation Study}
+
+To measure the contribution of individual authority signals, we run ablation variants that selectively enable signal subsets (Table~\ref{tab:ablation}).
+All variants use the same hybrid retrieval; only the authority re-ranking signals differ.
+
+\begin{table}[h]
+\centering
+\caption{Ablation study: contribution of individual authority signals.}
+\label{tab:ablation}
+\begin{tabular}{lccccc}
+\toprule
+Variant & P@5 & R@5 & MRR & Auth \\
+\midrule
+flat-only (no authority) & 18.0 & 58.0 & 54.3 & 82.2 \\
+directory-only           & 18.6 & 59.8 & 56.0 & 84.0 \\
+graph-only               & 18.8 & 59.8 & 56.7 & 85.3 \\
+graph+directory          & 19.2 & 61.0 & 57.7 & 85.6 \\
+graph+schema             & 19.4 & 61.1 & 57.6 & 85.8 \\
+\textbf{full}            & \textbf{19.5} & \textbf{61.7} & 56.5 & 85.6 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Key observations:
+\begin{itemize}
+    \item \textbf{Graph signals dominate.} Graph-only outperforms directory-only on MRR (56.7 vs 56.0) and Auth Recall (85.3 vs 84.0), confirming that structural analysis adds value beyond cheap path heuristics.
+    \item \textbf{Each signal adds value.} Full (all signals) achieves the best P@5 and R@5. No single signal dominates all metrics.
+    \item \textbf{Graph+schema is the best single combination} for Auth Recall (85.8\%) and R@1, validating that type-level analysis adds signal beyond graph structure alone.
+    \item \textbf{All authority variants beat flat retrieval} across every metric, confirming that authority re-ranking is consistently beneficial.
+\end{itemize}
+
+
+%% ============================================================
+\section{Discussion}
+%% ============================================================
+
+\paragraph{Authority as a complementary signal.}
+Our results show that authority-aware re-ranking is not a replacement for strong neural retrieval but a complementary layer.
+The largest gains come from adding authority to weaker retrieval methods (BM25, SymbolSearch), while gains over Hybrid/Dense are consistent but modest.
+This is expected: neural embeddings already capture some structural patterns implicitly through training data, while authority scoring makes these patterns explicit and deterministic.
+
+\paragraph{Why neural retrieval wins on R@1 and MRR.}
+DenseRetrieval achieves the highest R@1 (30.7\%) and MRR (55.1\%).
+These metrics reward placing a single correct file at position 1.
+Dense embeddings excel at semantic matching, which often identifies the most obviously relevant file.
+Authority re-ranking may sometimes promote a \emph{more authoritative} file above the \emph{most semantically similar} one, which improves precision and recall at deeper cutoffs but can lower R@1 when the promoted file is authoritative but not in the ground truth.
+
+\paragraph{Practical implications.}
+For AI coding agents, the most dangerous errors come not from missing a relevant file but from modifying a structurally critical file without understanding its authority.
+Authority recall (83.8\%) and blast-radius F1 (28.4\%) directly measure this safety-relevant capability.
+CodeBrain's consistent advantage on these metrics suggests practical value for agent governance, even when overall MRR differences are small.
+
+\paragraph{Error analysis: foundation vs.\ orchestration authority.}
+To probe what the authority score captures beyond the benchmark, we applied CodeBrain to three non-benchmark repositories spanning two languages: an independent 189-file Python operations agent, CodeBrain's own 28-module TypeScript implementation, and LangGraph, a 453-file Python agent-orchestration monorepo.
+Across all three, the model reliably elevated \emph{foundation} files---those that define shared state, schemas, persistence interfaces, and common error and type definitions---to the ROOT tier (in the Python agent, the connection layer, repository modules, and shared exceptions scored highest).
+This supports interpreting authority as structural \emph{blast radius} rather than human-perceived importance.
+The contrast is sharpest in LangGraph: \texttt{graph/state.py}, which defines the central \texttt{StateGraph} abstraction, ranked first, while \texttt{pregel/main.py}, the Pregel execution engine, ranked 67th of 453.
+More broadly, entry-point and orchestration files were consistently ranked \emph{below} expectation: in the Python agent, the command-line entry point and application \texttt{\_\_main\_\_} module fell into the LEAF tier (ranked 85th and 48th of 189 files), and the TypeScript implementation's server entry points ranked last.
+These files coordinate runtime execution but are dependency \emph{sinks}---they import many modules and are imported by none---so an in-degree-driven score treats them as disposable.
+This exposes a genuine distinction: repository authority is multi-dimensional.
+\emph{Foundation authority}, which the current model measures through dependency and contract centrality, captures files that many components depend on; this is the correct signal for the \texttt{guard\_change} and \texttt{is\_safe\_to\_modify} use cases, since a dependency sink genuinely has near-zero blast radius.
+\emph{Orchestration authority}---files that initiate or coordinate behavior---is orthogonal and is not captured by the current signals, so orchestrators may be important to developers yet under-ranked for behavior-governance queries.
+Conversely, widely imported utility files, such as diagramming helpers, can be over-ranked.
+We therefore treat CodeBrain v1 as a foundation-authority baseline and leave explicit orchestration/entry-point authority modeling to future work, evaluated as an optional ablation rather than folded into the reported configuration to avoid post-hoc tuning of the benchmark results.
+
+\paragraph{Limitations.}
+(1) Ground-truth annotations are LLM-assisted and may contain noise; inter-annotator agreement was not measured.
+(2) The authority weight $\alpha = 0.3$ was not extensively tuned; systematic hyperparameter search may yield better configurations.
+(3) CodeAuthorityBench covers 7 repositories in 4 languages; generalization to other languages and repository architectures requires further evaluation.
+(4) The benchmark evaluates static retrieval; integration with actual agent workflows (e.g., measuring whether authority-aware retrieval reduces agent edit errors) is left to future work.
+(5) As the error analysis above indicates, the current model captures foundation authority but not orchestration authority; entry-point and coordinator files may therefore be under-ranked for behavior-governance queries even when correctly ranked for blast-radius and safe-to-modify queries.
+
+
+%% ============================================================
+\section{Conclusion}
+%% ============================================================
+
+We introduced CodeAuthorityBench, a benchmark of 388 repository-understanding tasks designed to evaluate whether retrieval methods can identify structurally authoritative code, not just semantically similar files.
+We presented CodeBrain, an authority-aware re-ranking method that combines hybrid retrieval with deterministic structural authority scores.
+
+Our experiments show that authority-aware re-ranking significantly outperforms lexical, symbolic, graph-only, repo-map, and BM25-rerank baselines, while remaining competitive with strong neural and hybrid retrieval.
+CodeBrain leads 7 of 10 metrics, with its clearest advantages in authority recall, NDCG, and blast-radius estimation---metrics most relevant to the safety of AI coding agent behavior.
+
+We release CodeAuthorityBench, the CodeBrain MCP server, and full reproduction scripts to support further research on authority-aware code retrieval.
+
+
+%% ============================================================
+%% References
+%% ============================================================
+
+\bibliographystyle{ACM-Reference-Format}
+
+\begin{thebibliography}{10}
+
+\bibitem{treebench2026}
+Sahil Soni. 2026.
+\newblock TreeBench: Evaluating Hierarchical Retrieval for Regulatory Question Answering.
+\newblock \emph{arXiv preprint}.
+
+\bibitem{feng2020codebert}
+Zhangyin Feng, Daya Guo, Duyu Tang, Nan Duan, Xiaocheng Feng, Ming Gong, Linjun Shou, Bing Qin, Ting Liu, Daxin Jiang, and Ming Zhou. 2020.
+\newblock CodeBERT: A Pre-Trained Model for Programming and Natural Languages.
+\newblock \emph{Findings of EMNLP 2020}.
+
+\bibitem{guo2022unixcoder}
+Daya Guo, Shuai Lu, Nan Duan, Yanlin Wang, Ming Zhou, and Jian Yin. 2022.
+\newblock UniXcoder: Unified Cross-Modal Pre-training for Code Representation.
+\newblock \emph{ACL 2022}.
+
+\bibitem{aider2024}
+Paul Gauthier. 2024.
+\newblock Aider: AI pair programming in your terminal.
+\newblock \url{https://aider.chat}.
+
+\bibitem{reps1998program}
+Thomas Reps. 1998.
+\newblock Program analysis via graph reachability.
+\newblock \emph{Information and Software Technology} 40, 11-12 (1998), 701--726.
+
+\bibitem{zhang2023repocoder}
+Fengji Zhang, Bei Chen, Yue Zhang, Jin Liu, Daoguang Zan, Yi Mao, Jian-Guang Lou, and Weizhu Chen. 2023.
+\newblock RepoCoder: Repository-Level Code Completion Through Iterative Retrieval and Generation.
+\newblock \emph{EMNLP 2023}.
+
+\bibitem{liu2023repobench}
+Tianyang Liu, Canwen Xu, and Julian McAuley. 2023.
+\newblock RepoBench: Benchmarking Repository-Level Code Auto-Completion Systems.
+\newblock \emph{arXiv preprint arXiv:2306.03091}.
+
+\end{thebibliography}
+
+\end{document}

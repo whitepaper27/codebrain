@@ -1,0 +1,68 @@
+{
+  "name": "@codebrain/mcp-server",
+  "version": "0.1.0-alpha",
+  "description": "Authority-aware code retrieval for AI coding agents",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "codebrain": "dist/index.js",
+    "codebrain-mcp": "dist/mcp-server.js"
+  },
+  "files": [
+    "dist",
+    "grammars"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "serve": "tsx src/mcp-server.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "tsc --noEmit",
+    "benchmark": "tsx benchmarks/evaluate.ts",
+    "prepublishOnly": "npm run lint && npm run test && npm run build"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "keywords": [
+    "code-intelligence",
+    "mcp",
+    "authority",
+    "code-retrieval",
+    "tree-sitter",
+    "ai-agents"
+  ],
+  "author": "Sahil Soni",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/whitepaper27/codebrain"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "better-sqlite3": "^12.11.1",
+    "commander": "^15.0.0",
+    "dotenv": "^17.4.2",
+    "fast-glob": "^3.3.3",
+    "ignore": "^7.0.5",
+    "minimatch": "^10.2.5",
+    "simple-git": "^3.36.0",
+    "web-tree-sitter": "^0.26.9",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^26.0.1",
+    "tree-sitter-c": "^0.24.1",
+    "tree-sitter-cli": "^0.26.9",
+    "tree-sitter-go": "^0.25.0",
+    "tree-sitter-java": "^0.23.5",
+    "tree-sitter-python": "^0.25.0",
+    "tree-sitter-typescript": "^0.23.2",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
+  }
+}

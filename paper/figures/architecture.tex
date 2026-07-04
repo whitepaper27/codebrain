@@ -1,0 +1,70 @@
+% Architecture diagram for CodeBrain paper
+% Include in main.tex with: \input{figures/architecture}
+%
+% This TikZ diagram shows the two-phase pipeline:
+%   Phase 1: Structure (file discovery -> AST parsing -> graph building -> topology.json)
+%   Phase 2: Authority (topology -> scoring -> classification -> authority_tree.json)
+%   MCP Interface: tools exposed to AI coding agents
+
+\begin{figure*}[t]
+\centering
+\begin{tikzpicture}[
+    node distance=1.2cm and 1.5cm,
+    block/.style={rectangle, draw, rounded corners, minimum height=0.8cm, minimum width=2.2cm, align=center, font=\small},
+    phase/.style={rectangle, draw, dashed, rounded corners, inner sep=0.4cm, fill=gray!5},
+    output/.style={rectangle, draw, fill=blue!10, rounded corners, minimum height=0.7cm, align=center, font=\small\ttfamily},
+    tool/.style={rectangle, draw, fill=green!10, rounded corners, minimum height=0.7cm, align=center, font=\small\ttfamily},
+    arrow/.style={-{Stealth[length=2mm]}, thick},
+    label/.style={font=\small\bfseries, anchor=north west}
+]
+
+% Phase 1: Structure
+\node[block] (discover) {File\\Discovery};
+\node[block, right=of discover] (parse) {AST\\Parsing};
+\node[block, right=of parse] (graph) {Graph\\Building};
+\node[output, right=of graph] (topology) {topology.json};
+
+% Phase 2: Authority
+\node[block, below=1.5cm of discover] (score) {Authority\\Scoring};
+\node[block, right=of score] (classify) {Tier\\Classification};
+\node[block, right=of classify] (blast) {Blast Radius\\Computation};
+\node[output, right=of blast] (authority) {authority\_tree.json};
+
+% MCP Interface
+\node[tool, below=1.5cm of score] (search) {search\_with\_hierarchy};
+\node[tool, right=of search] (explain) {explain\_module\_authority};
+\node[tool, right=of explain] (diffblast) {diff\_blast\_radius};
+\node[tool, right=of diffblast] (guard) {guard\_change};
+
+% Arrows - Phase 1
+\draw[arrow] (discover) -- (parse);
+\draw[arrow] (parse) -- (graph);
+\draw[arrow] (graph) -- (topology);
+
+% Arrows - Phase 1 to Phase 2
+\draw[arrow] (topology) |- (score);
+
+% Arrows - Phase 2
+\draw[arrow] (score) -- (classify);
+\draw[arrow] (classify) -- (blast);
+\draw[arrow] (blast) -- (authority);
+
+% Arrows - Phase 2 to MCP
+\draw[arrow] (authority) |- (search);
+\draw[arrow] (authority) |- (explain);
+\draw[arrow] (authority) |- (diffblast);
+\draw[arrow] (authority) |- (guard);
+
+% Phase labels
+\node[label, above=0.1cm of discover] {\textsc{Phase 1: Structure}};
+\node[label, above=0.1cm of score] {\textsc{Phase 2: Authority}};
+\node[label, above=0.1cm of search] {\textsc{MCP Interface}};
+
+% Input/output annotations
+\node[font=\scriptsize, anchor=east, text=gray] at (discover.west) {.gitignore\\respect};
+\node[font=\scriptsize, anchor=south, text=gray] at (parse.south) {tree-sitter\\6 languages};
+
+\end{tikzpicture}
+\caption{CodeBrain architecture. Phase 1 builds a structural dependency graph from source files using tree-sitter AST parsing. Phase 2 computes authority scores from six deterministic signals. Both phases are deterministic and require no LLM. Four MCP tools expose authority-aware retrieval to AI coding agents.}
+\label{fig:architecture}
+\end{figure*}

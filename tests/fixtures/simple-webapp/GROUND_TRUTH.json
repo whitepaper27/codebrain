@@ -1,0 +1,37 @@
+{
+  "expected_authority_ranking": [
+    { "file": "src/core/schema.ts", "tier": "ROOT", "min_score": 0.8 },
+    { "file": "src/core/database.ts", "tier": "ROOT", "min_score": 0.7 },
+    { "file": "src/services/user-service.ts", "tier": "DERIVED" },
+    { "file": "src/services/post-service.ts", "tier": "DERIVED" },
+    { "file": "src/routes/user-routes.ts", "tier": "DERIVED" },
+    { "file": "src/routes/post-routes.ts", "tier": "DERIVED" },
+    { "file": "src/app.ts", "tier": "DERIVED" },
+    { "file": "src/index.ts", "tier": "LEAF" },
+    { "file": "tests/user-service.test.ts", "tier": "LEAF" },
+    { "file": "tests/post-service.test.ts", "tier": "LEAF" }
+  ],
+  "expected_imports": {
+    "src/core/database.ts": ["src/core/schema.ts"],
+    "src/services/user-service.ts": ["src/core/schema.ts", "src/core/database.ts"],
+    "src/services/post-service.ts": ["src/core/schema.ts", "src/core/database.ts"],
+    "src/routes/user-routes.ts": ["src/services/user-service.ts"],
+    "src/routes/post-routes.ts": ["src/services/post-service.ts"],
+    "src/app.ts": ["src/routes/user-routes.ts", "src/routes/post-routes.ts"],
+    "src/index.ts": ["src/app.ts"],
+    "tests/user-service.test.ts": ["src/services/user-service.ts", "src/core/database.ts"],
+    "tests/post-service.test.ts": ["src/services/post-service.ts", "src/core/database.ts"]
+  },
+  "expected_in_degrees": {
+    "src/core/schema.ts": 3,
+    "src/core/database.ts": 6,
+    "src/services/user-service.ts": 3,
+    "src/services/post-service.ts": 3,
+    "src/routes/user-routes.ts": 1,
+    "src/routes/post-routes.ts": 1,
+    "src/app.ts": 2,
+    "src/index.ts": 0,
+    "tests/user-service.test.ts": 0,
+    "tests/post-service.test.ts": 0
+  }
+}

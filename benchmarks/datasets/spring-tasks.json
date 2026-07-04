@@ -1,0 +1,1085 @@
+{
+  "repo": "spring-framework",
+  "repo_url": "https://github.com/spring-projects/spring-framework",
+  "commit": "ce718cf699dde1b35c425f81548a1679566aa63b",
+  "commit_tag": "ce718cf",
+  "commit_date": "2026-06-28",
+  "annotator": "codebrain-team",
+  "annotation_date": "2026-06-28",
+  "annotation_guidelines": "Ground truth files are those with structural authority over the queried behavior. Files are selected based on dependency centrality, schema ownership, and behavioral control — not textual similarity to the query.",
+  "task_type_distribution": {
+    "what_governs": "29%",
+    "where_is_schema": "25%",
+    "what_breaks": "25%",
+    "is_safe_to_modify": "20%"
+  },
+  "tasks": [
+    {
+      "id": "spring-001",
+      "repo": "spring-framework",
+      "query": "What governs how Spring beans are created and managed?",
+      "task_type": "what_governs",
+      "ground_truth_files": [
+        "spring-beans/src/main/java/org/springframework/beans/factory/BeanFactory.java",
+        "spring-beans/src/main/java/org/springframework/beans/factory/support/DefaultListableBeanFactory.java"
+      ],
+      "authority_tiers": {
+        "spring-beans/src/main/java/org/springframework/beans/factory/BeanFactory.java": "ROOT",
+        "spring-beans/src/main/java/org/springframework/beans/factory/support/DefaultListableBeanFactory.java": "ROOT"
+      },
+      "difficulty": "easy",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "BeanFactory is the root interface defining the DI container contract. DefaultListableBeanFactory is the canonical implementation that nearly all Spring contexts delegate to for bean registration, resolution, and lifecycle management."
+    },
+    {
+      "id": "spring-002",
+      "repo": "spring-framework",
+      "query": "What controls how HTTP requests are dispatched to controller methods in Spring MVC?",
+      "task_type": "what_governs",
+      "ground_truth_files": [
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/DispatcherServlet.java"
+      ],
+      "authority_tiers": {
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/DispatcherServlet.java": "ROOT"
+      },
+      "difficulty": "easy",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "DispatcherServlet is the front controller of Spring MVC. Every HTTP request flows through its doDispatch() method, which coordinates handler mapping, handler adapters, view resolution, and exception handling."
+    },
+    {
+      "id": "spring-003",
+      "repo": "spring-framework",
+      "query": "What governs the Spring application context lifecycle — startup, refresh, and shutdown?",
+      "task_type": "what_governs",
+      "ground_truth_files": [
+        "spring-context/src/main/java/org/springframework/context/support/AbstractApplicationContext.java",
+        "spring-context/src/main/java/org/springframework/context/ConfigurableApplicationContext.java"
+      ],
+      "authority_tiers": {
+        "spring-context/src/main/java/org/springframework/context/support/AbstractApplicationContext.java": "ROOT",
+        "spring-context/src/main/java/org/springframework/context/ConfigurableApplicationContext.java": "ROOT"
+      },
+      "difficulty": "easy",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "AbstractApplicationContext implements the refresh() method, which is the master lifecycle orchestrator — it creates the bean factory, invokes post-processors, registers listeners, and finishes initialization. ConfigurableApplicationContext defines the lifecycle contract."
+    },
+    {
+      "id": "spring-004",
+      "repo": "spring-framework",
+      "query": "What governs how @Autowired injection is resolved?",
+      "task_type": "what_governs",
+      "ground_truth_files": [
+        "spring-beans/src/main/java/org/springframework/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.java",
+        "spring-beans/src/main/java/org/springframework/beans/factory/support/DefaultListableBeanFactory.java"
+      ],
+      "authority_tiers": {
+        "spring-beans/src/main/java/org/springframework/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.java": "ROOT",
+        "spring-beans/src/main/java/org/springframework/beans/factory/support/DefaultListableBeanFactory.java": "ROOT"
+      },
+      "difficulty": "medium",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "AutowiredAnnotationBeanPostProcessor detects @Autowired/@Value annotations and triggers injection. DefaultListableBeanFactory.resolveDependency() is the actual resolution engine that finds matching beans by type."
+    },
+    {
+      "id": "spring-005",
+      "repo": "spring-framework",
+      "query": "What controls how @RequestMapping annotations are mapped to handler methods?",
+      "task_type": "what_governs",
+      "ground_truth_files": [
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/mvc/method/annotation/RequestMappingHandlerMapping.java",
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/handler/AbstractHandlerMethodMapping.java"
+      ],
+      "authority_tiers": {
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/mvc/method/annotation/RequestMappingHandlerMapping.java": "ROOT",
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/handler/AbstractHandlerMethodMapping.java": "ROOT"
+      },
+      "difficulty": "medium",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "RequestMappingHandlerMapping scans for @RequestMapping annotations and creates the URL-to-handler registry. AbstractHandlerMethodMapping provides the core matching and lookup algorithm that resolves incoming requests to handler methods."
+    },
+    {
+      "id": "spring-006",
+      "repo": "spring-framework",
+      "query": "What governs declarative transaction management with @Transactional?",
+      "task_type": "what_governs",
+      "ground_truth_files": [
+        "spring-tx/src/main/java/org/springframework/transaction/interceptor/TransactionInterceptor.java",
+        "spring-tx/src/main/java/org/springframework/transaction/annotation/Transactional.java",
+        "spring-tx/src/main/java/org/springframework/transaction/PlatformTransactionManager.java"
+      ],
+      "authority_tiers": {
+        "spring-tx/src/main/java/org/springframework/transaction/interceptor/TransactionInterceptor.java": "ROOT",
+        "spring-tx/src/main/java/org/springframework/transaction/annotation/Transactional.java": "ROOT",
+        "spring-tx/src/main/java/org/springframework/transaction/PlatformTransactionManager.java": "ROOT"
+      },
+      "difficulty": "medium",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "TransactionInterceptor is the AOP advice that wraps methods in transaction boundaries. @Transactional defines the annotation contract. PlatformTransactionManager is the SPI that all transaction implementations must conform to."
+    },
+    {
+      "id": "spring-007",
+      "repo": "spring-framework",
+      "query": "What controls AOP proxy creation in Spring?",
+      "task_type": "what_governs",
+      "ground_truth_files": [
+        "spring-aop/src/main/java/org/springframework/aop/framework/ProxyFactory.java",
+        "spring-aop/src/main/java/org/springframework/aop/framework/JdkDynamicAopProxy.java",
+        "spring-aop/src/main/java/org/springframework/aop/framework/CglibAopProxy.java"
+      ],
+      "authority_tiers": {
+        "spring-aop/src/main/java/org/springframework/aop/framework/ProxyFactory.java": "ROOT",
+        "spring-aop/src/main/java/org/springframework/aop/framework/JdkDynamicAopProxy.java": "ROOT",
+        "spring-aop/src/main/java/org/springframework/aop/framework/CglibAopProxy.java": "ROOT"
+      },
+      "difficulty": "medium",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "ProxyFactory is the programmatic entry point for creating AOP proxies. JdkDynamicAopProxy and CglibAopProxy are the two concrete proxy implementations that intercept method calls and apply advice chains."
+    },
+    {
+      "id": "spring-008",
+      "repo": "spring-framework",
+      "query": "What governs how @Configuration classes are parsed and bean definitions registered?",
+      "task_type": "what_governs",
+      "ground_truth_files": [
+        "spring-context/src/main/java/org/springframework/context/annotation/ConfigurationClassParser.java",
+        "spring-context/src/main/java/org/springframework/context/annotation/ClassPathBeanDefinitionScanner.java"
+      ],
+      "authority_tiers": {
+        "spring-context/src/main/java/org/springframework/context/annotation/ConfigurationClassParser.java": "ROOT",
+        "spring-context/src/main/java/org/springframework/context/annotation/ClassPathBeanDefinitionScanner.java": "ROOT"
+      },
+      "difficulty": "hard",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "ConfigurationClassParser recursively processes @Configuration, @Import, @ComponentScan, and @Bean annotations to build the configuration model. ClassPathBeanDefinitionScanner discovers annotated components on the classpath and registers their definitions."
+    },
+    {
+      "id": "spring-009",
+      "repo": "spring-framework",
+      "query": "What governs how Spring resolves the view to render for a controller response?",
+      "task_type": "what_governs",
+      "ground_truth_files": [
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/ViewResolver.java",
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/DispatcherServlet.java"
+      ],
+      "authority_tiers": {
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/ViewResolver.java": "ROOT",
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/DispatcherServlet.java": "ROOT"
+      },
+      "difficulty": "easy",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "ViewResolver is the SPI for resolving logical view names to concrete View instances. DispatcherServlet orchestrates view resolution as part of the request lifecycle by iterating registered ViewResolvers."
+    },
+    {
+      "id": "spring-010",
+      "repo": "spring-framework",
+      "query": "What governs how Spring handles application events and event listeners?",
+      "task_type": "what_governs",
+      "ground_truth_files": [
+        "spring-context/src/main/java/org/springframework/context/event/ApplicationEventMulticaster.java",
+        "spring-context/src/main/java/org/springframework/context/event/SimpleApplicationEventMulticaster.java",
+        "spring-context/src/main/java/org/springframework/context/ApplicationListener.java"
+      ],
+      "authority_tiers": {
+        "spring-context/src/main/java/org/springframework/context/event/ApplicationEventMulticaster.java": "ROOT",
+        "spring-context/src/main/java/org/springframework/context/event/SimpleApplicationEventMulticaster.java": "ROOT",
+        "spring-context/src/main/java/org/springframework/context/ApplicationListener.java": "ROOT"
+      },
+      "difficulty": "medium",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "ApplicationEventMulticaster is the SPI that controls event broadcasting strategy. SimpleApplicationEventMulticaster is the default implementation. ApplicationListener is the callback contract all listeners implement."
+    },
+    {
+      "id": "spring-011",
+      "repo": "spring-framework",
+      "query": "What governs how Spring resolves property placeholders like ${db.url}?",
+      "task_type": "what_governs",
+      "ground_truth_files": [
+        "spring-context/src/main/java/org/springframework/context/support/PropertySourcesPlaceholderConfigurer.java",
+        "spring-core/src/main/java/org/springframework/core/env/Environment.java"
+      ],
+      "authority_tiers": {
+        "spring-context/src/main/java/org/springframework/context/support/PropertySourcesPlaceholderConfigurer.java": "ROOT",
+        "spring-core/src/main/java/org/springframework/core/env/Environment.java": "ROOT"
+      },
+      "difficulty": "medium",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "PropertySourcesPlaceholderConfigurer is the BeanFactoryPostProcessor that resolves ${...} placeholders in bean definitions. Environment is the abstraction that unifies property sources (system properties, env vars, application config)."
+    },
+    {
+      "id": "spring-012",
+      "repo": "spring-framework",
+      "query": "What governs how handler method arguments are resolved from HTTP requests in Spring MVC?",
+      "task_type": "what_governs",
+      "ground_truth_files": [
+        "spring-web/src/main/java/org/springframework/web/method/support/HandlerMethodArgumentResolver.java",
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/mvc/method/annotation/RequestMappingHandlerAdapter.java"
+      ],
+      "authority_tiers": {
+        "spring-web/src/main/java/org/springframework/web/method/support/HandlerMethodArgumentResolver.java": "ROOT",
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/mvc/method/annotation/RequestMappingHandlerAdapter.java": "ROOT"
+      },
+      "difficulty": "hard",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "HandlerMethodArgumentResolver is the SPI that all argument resolvers implement (@RequestParam, @PathVariable, @RequestBody, etc.). RequestMappingHandlerAdapter orchestrates the full chain of argument resolvers when invoking handler methods."
+    },
+    {
+      "id": "spring-013",
+      "repo": "spring-framework",
+      "query": "What controls how Spring MVC handles exceptions thrown by controllers?",
+      "task_type": "what_governs",
+      "ground_truth_files": [
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/HandlerExceptionResolver.java",
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/mvc/method/annotation/ExceptionHandlerExceptionResolver.java"
+      ],
+      "authority_tiers": {
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/HandlerExceptionResolver.java": "ROOT",
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/mvc/method/annotation/ExceptionHandlerExceptionResolver.java": "ROOT"
+      },
+      "difficulty": "easy",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "HandlerExceptionResolver is the root interface for all MVC exception handling strategies. ExceptionHandlerExceptionResolver implements @ExceptionHandler method invocation, which is the dominant exception handling pattern in modern Spring apps."
+    },
+    {
+      "id": "spring-014",
+      "repo": "spring-framework",
+      "query": "What governs how the Spring bean lifecycle proceeds from instantiation through initialization to destruction?",
+      "task_type": "what_governs",
+      "ground_truth_files": [
+        "spring-beans/src/main/java/org/springframework/beans/factory/support/AbstractAutowireCapableBeanFactory.java",
+        "spring-beans/src/main/java/org/springframework/beans/factory/config/BeanPostProcessor.java"
+      ],
+      "authority_tiers": {
+        "spring-beans/src/main/java/org/springframework/beans/factory/support/AbstractAutowireCapableBeanFactory.java": "ROOT",
+        "spring-beans/src/main/java/org/springframework/beans/factory/config/BeanPostProcessor.java": "ROOT"
+      },
+      "difficulty": "hard",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "AbstractAutowireCapableBeanFactory contains createBean(), initializeBean(), and the full lifecycle sequence. BeanPostProcessor defines the hook points that allow interception before and after initialization."
+    },
+    {
+      "id": "spring-015",
+      "repo": "spring-framework",
+      "query": "What controls how reactive HTTP requests are dispatched in Spring WebFlux?",
+      "task_type": "what_governs",
+      "ground_truth_files": [
+        "spring-webflux/src/main/java/org/springframework/web/reactive/DispatcherHandler.java"
+      ],
+      "authority_tiers": {
+        "spring-webflux/src/main/java/org/springframework/web/reactive/DispatcherHandler.java": "ROOT"
+      },
+      "difficulty": "easy",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "DispatcherHandler is the WebFlux equivalent of DispatcherServlet. It is the central handler that routes reactive web requests through handler mappings, handler adapters, and result handlers."
+    },
+    {
+      "id": "spring-016",
+      "repo": "spring-framework",
+      "query": "What governs how Spring MVC configuration is customized (interceptors, formatters, message converters)?",
+      "task_type": "what_governs",
+      "ground_truth_files": [
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/config/annotation/WebMvcConfigurer.java",
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/config/annotation/WebMvcConfigurationSupport.java"
+      ],
+      "authority_tiers": {
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/config/annotation/WebMvcConfigurer.java": "ROOT",
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/config/annotation/WebMvcConfigurationSupport.java": "ROOT"
+      },
+      "difficulty": "medium",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "WebMvcConfigurer is the callback interface that applications implement to customize MVC configuration. WebMvcConfigurationSupport is the base class that instantiates and wires all MVC infrastructure beans, applying WebMvcConfigurer callbacks."
+    },
+    {
+      "id": "spring-017",
+      "repo": "spring-framework",
+      "query": "Where is the schema for a Spring bean definition — its metadata structure?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": [
+        "spring-beans/src/main/java/org/springframework/beans/factory/config/BeanDefinition.java"
+      ],
+      "authority_tiers": {
+        "spring-beans/src/main/java/org/springframework/beans/factory/config/BeanDefinition.java": "ROOT"
+      },
+      "difficulty": "easy",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "BeanDefinition is the interface that defines the metadata schema for every bean: class name, scope, lazy-init, dependencies, constructor args, property values. Every bean registration uses this contract."
+    },
+    {
+      "id": "spring-018",
+      "repo": "spring-framework",
+      "query": "Where is the schema for the Spring ApplicationContext interface hierarchy?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": [
+        "spring-context/src/main/java/org/springframework/context/ApplicationContext.java",
+        "spring-context/src/main/java/org/springframework/context/ConfigurableApplicationContext.java"
+      ],
+      "authority_tiers": {
+        "spring-context/src/main/java/org/springframework/context/ApplicationContext.java": "ROOT",
+        "spring-context/src/main/java/org/springframework/context/ConfigurableApplicationContext.java": "ROOT"
+      },
+      "difficulty": "easy",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "ApplicationContext defines the read-only contract (getBean, getEnvironment, getResource, publishEvent). ConfigurableApplicationContext extends it with lifecycle operations (refresh, close, addBeanFactoryPostProcessor). Together they define the full context schema."
+    },
+    {
+      "id": "spring-019",
+      "repo": "spring-framework",
+      "query": "Where is the interface that defines the contract for Spring's transaction management?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": [
+        "spring-tx/src/main/java/org/springframework/transaction/PlatformTransactionManager.java",
+        "spring-tx/src/main/java/org/springframework/transaction/TransactionDefinition.java"
+      ],
+      "authority_tiers": {
+        "spring-tx/src/main/java/org/springframework/transaction/PlatformTransactionManager.java": "ROOT",
+        "spring-tx/src/main/java/org/springframework/transaction/TransactionDefinition.java": "ROOT"
+      },
+      "difficulty": "easy",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "PlatformTransactionManager defines the three-method SPI (getTransaction, commit, rollback) that all transaction managers implement. TransactionDefinition defines the schema for propagation, isolation, timeout, and read-only settings."
+    },
+    {
+      "id": "spring-020",
+      "repo": "spring-framework",
+      "query": "Where is the interface that defines the contract for handler-to-request mapping in Spring MVC?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": [
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/HandlerMapping.java"
+      ],
+      "authority_tiers": {
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/HandlerMapping.java": "ROOT"
+      },
+      "difficulty": "easy",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "HandlerMapping is the root strategy interface that maps HTTP requests to handler objects. All URL mapping strategies (annotation-based, path-based, bean-name-based) implement this interface."
+    },
+    {
+      "id": "spring-021",
+      "repo": "spring-framework",
+      "query": "Where is the interface schema for HTTP message conversion (JSON/XML serialization)?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": [
+        "spring-web/src/main/java/org/springframework/http/converter/HttpMessageConverter.java"
+      ],
+      "authority_tiers": {
+        "spring-web/src/main/java/org/springframework/http/converter/HttpMessageConverter.java": "ROOT"
+      },
+      "difficulty": "easy",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "HttpMessageConverter defines the contract for converting HTTP request/response bodies to/from Java objects. Jackson, JAXB, and all other serializers implement this interface."
+    },
+    {
+      "id": "spring-022",
+      "repo": "spring-framework",
+      "query": "Where is the interface that defines Spring's AOP pointcut matching contract?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": [
+        "spring-aop/src/main/java/org/springframework/aop/Pointcut.java",
+        "spring-aop/src/main/java/org/springframework/aop/Advisor.java"
+      ],
+      "authority_tiers": {
+        "spring-aop/src/main/java/org/springframework/aop/Pointcut.java": "ROOT",
+        "spring-aop/src/main/java/org/springframework/aop/Advisor.java": "ROOT"
+      },
+      "difficulty": "medium",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "Pointcut defines the schema for matching join points via ClassFilter and MethodMatcher. Advisor combines a Pointcut with Advice, defining the complete AOP interception contract."
+    },
+    {
+      "id": "spring-023",
+      "repo": "spring-framework",
+      "query": "Where is the interface that defines how Spring beans are post-processed during initialization?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": [
+        "spring-beans/src/main/java/org/springframework/beans/factory/config/BeanPostProcessor.java",
+        "spring-beans/src/main/java/org/springframework/beans/factory/config/BeanFactoryPostProcessor.java"
+      ],
+      "authority_tiers": {
+        "spring-beans/src/main/java/org/springframework/beans/factory/config/BeanPostProcessor.java": "ROOT",
+        "spring-beans/src/main/java/org/springframework/beans/factory/config/BeanFactoryPostProcessor.java": "ROOT"
+      },
+      "difficulty": "medium",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "BeanPostProcessor defines hooks invoked on every bean instance (before/after initialization). BeanFactoryPostProcessor defines hooks that modify bean definitions before any beans are instantiated. Together they define the two-phase post-processing schema."
+    },
+    {
+      "id": "spring-024",
+      "repo": "spring-framework",
+      "query": "Where is the interface for Spring's resource loading abstraction?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": [
+        "spring-core/src/main/java/org/springframework/core/io/Resource.java",
+        "spring-core/src/main/java/org/springframework/core/io/ResourceLoader.java"
+      ],
+      "authority_tiers": {
+        "spring-core/src/main/java/org/springframework/core/io/Resource.java": "ROOT",
+        "spring-core/src/main/java/org/springframework/core/io/ResourceLoader.java": "ROOT"
+      },
+      "difficulty": "easy",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "Resource is the abstraction for classpath, filesystem, and URL resources. ResourceLoader is the strategy interface for resolving location strings into Resource instances. Together they form the resource access schema used across the entire framework."
+    },
+    {
+      "id": "spring-025",
+      "repo": "spring-framework",
+      "query": "Where is the schema for Spring's type conversion system?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": [
+        "spring-core/src/main/java/org/springframework/core/convert/ConversionService.java"
+      ],
+      "authority_tiers": {
+        "spring-core/src/main/java/org/springframework/core/convert/ConversionService.java": "ROOT"
+      },
+      "difficulty": "medium",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "ConversionService is the central interface for Spring's type conversion SPI. It governs how objects are converted between types throughout the framework — binding, SpEL evaluation, and configuration property resolution all delegate to it."
+    },
+    {
+      "id": "spring-026",
+      "repo": "spring-framework",
+      "query": "Where is the interface that defines how Spring MVC adapts handlers for execution?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": [
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/HandlerAdapter.java"
+      ],
+      "authority_tiers": {
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/HandlerAdapter.java": "ROOT"
+      },
+      "difficulty": "medium",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "HandlerAdapter is the SPI that DispatcherServlet uses to invoke any type of handler. It decouples request dispatching from handler implementation, allowing controllers, HttpRequestHandlers, and annotated methods to coexist."
+    },
+    {
+      "id": "spring-027",
+      "repo": "spring-framework",
+      "query": "Where is the interface that defines Spring's Environment abstraction for profiles and properties?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": [
+        "spring-core/src/main/java/org/springframework/core/env/Environment.java"
+      ],
+      "authority_tiers": {
+        "spring-core/src/main/java/org/springframework/core/env/Environment.java": "ROOT"
+      },
+      "difficulty": "easy",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "Environment is the root interface for profile activation and property resolution. It governs which beans are active (@Profile) and how configuration properties are resolved throughout the application."
+    },
+    {
+      "id": "spring-028",
+      "repo": "spring-framework",
+      "query": "Where is the interface for Spring's bean property access and type conversion on individual beans?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": [
+        "spring-beans/src/main/java/org/springframework/beans/BeanWrapper.java",
+        "spring-beans/src/main/java/org/springframework/beans/PropertyAccessor.java"
+      ],
+      "authority_tiers": {
+        "spring-beans/src/main/java/org/springframework/beans/BeanWrapper.java": "ROOT",
+        "spring-beans/src/main/java/org/springframework/beans/PropertyAccessor.java": "ROOT"
+      },
+      "difficulty": "hard",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "BeanWrapper is the interface for wrapping a bean and accessing its properties with type conversion. PropertyAccessor is the parent interface defining get/setPropertyValue operations. The DI container uses BeanWrapper internally to populate bean properties."
+    },
+    {
+      "id": "spring-029",
+      "repo": "spring-framework",
+      "query": "Where is the interface that defines how Spring manages bean scopes (singleton, prototype, request, session)?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": [
+        "spring-beans/src/main/java/org/springframework/beans/factory/config/Scope.java"
+      ],
+      "authority_tiers": {
+        "spring-beans/src/main/java/org/springframework/beans/factory/config/Scope.java": "ROOT"
+      },
+      "difficulty": "medium",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "Scope is the SPI that governs object creation, storage, and destruction for custom scopes. Request, session, and application scopes are all implementations of this interface. The bean factory delegates to Scope.get() for non-singleton/prototype beans."
+    },
+    {
+      "id": "spring-030",
+      "repo": "spring-framework",
+      "query": "Where is the contract for the SpEL expression evaluation system?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": [
+        "spring-expression/src/main/java/org/springframework/expression/Expression.java",
+        "spring-expression/src/main/java/org/springframework/expression/ExpressionParser.java",
+        "spring-expression/src/main/java/org/springframework/expression/EvaluationContext.java"
+      ],
+      "authority_tiers": {
+        "spring-expression/src/main/java/org/springframework/expression/Expression.java": "ROOT",
+        "spring-expression/src/main/java/org/springframework/expression/ExpressionParser.java": "ROOT",
+        "spring-expression/src/main/java/org/springframework/expression/EvaluationContext.java": "ROOT"
+      },
+      "difficulty": "hard",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "Expression defines the evaluated-expression contract. ExpressionParser defines parsing. EvaluationContext defines the variable/function/type resolution environment. Together these three interfaces form the complete SpEL schema."
+    },
+    {
+      "id": "spring-031",
+      "repo": "spring-framework",
+      "query": "What breaks across the framework if the BeanFactory interface is modified?",
+      "task_type": "what_breaks",
+      "ground_truth_files": [
+        "spring-beans/src/main/java/org/springframework/beans/factory/BeanFactory.java",
+        "spring-beans/src/main/java/org/springframework/beans/factory/support/DefaultListableBeanFactory.java",
+        "spring-context/src/main/java/org/springframework/context/ApplicationContext.java",
+        "spring-context/src/main/java/org/springframework/context/support/AbstractApplicationContext.java"
+      ],
+      "authority_tiers": {
+        "spring-beans/src/main/java/org/springframework/beans/factory/BeanFactory.java": "ROOT",
+        "spring-beans/src/main/java/org/springframework/beans/factory/support/DefaultListableBeanFactory.java": "ROOT",
+        "spring-context/src/main/java/org/springframework/context/ApplicationContext.java": "ROOT",
+        "spring-context/src/main/java/org/springframework/context/support/AbstractApplicationContext.java": "ROOT"
+      },
+      "difficulty": "easy",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "BeanFactory is the root of the DI container hierarchy. ApplicationContext extends it. DefaultListableBeanFactory implements it. AbstractApplicationContext delegates to it. Changing BeanFactory breaks the entire bean container, every context implementation, and all modules that depend on bean resolution."
+    },
+    {
+      "id": "spring-032",
+      "repo": "spring-framework",
+      "query": "What breaks if DispatcherServlet's doDispatch() method is restructured?",
+      "task_type": "what_breaks",
+      "ground_truth_files": [
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/DispatcherServlet.java",
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/HandlerMapping.java",
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/HandlerAdapter.java",
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/HandlerExceptionResolver.java"
+      ],
+      "authority_tiers": {
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/DispatcherServlet.java": "ROOT",
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/HandlerMapping.java": "ROOT",
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/HandlerAdapter.java": "ROOT",
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/HandlerExceptionResolver.java": "ROOT"
+      },
+      "difficulty": "medium",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "doDispatch() is the central coordination point that calls HandlerMapping, HandlerAdapter, and HandlerExceptionResolver in sequence. Restructuring it changes the invocation contract for all three SPIs and breaks any code that depends on the current handler lifecycle order."
+    },
+    {
+      "id": "spring-033",
+      "repo": "spring-framework",
+      "query": "What breaks if the BeanDefinition interface changes its property contract?",
+      "task_type": "what_breaks",
+      "ground_truth_files": [
+        "spring-beans/src/main/java/org/springframework/beans/factory/config/BeanDefinition.java",
+        "spring-beans/src/main/java/org/springframework/beans/factory/support/DefaultListableBeanFactory.java",
+        "spring-context/src/main/java/org/springframework/context/annotation/ConfigurationClassParser.java"
+      ],
+      "authority_tiers": {
+        "spring-beans/src/main/java/org/springframework/beans/factory/config/BeanDefinition.java": "ROOT",
+        "spring-beans/src/main/java/org/springframework/beans/factory/support/DefaultListableBeanFactory.java": "ROOT",
+        "spring-context/src/main/java/org/springframework/context/annotation/ConfigurationClassParser.java": "ROOT"
+      },
+      "difficulty": "hard",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "BeanDefinition is the metadata schema that the bean factory reads to instantiate beans. DefaultListableBeanFactory consumes it during bean creation. ConfigurationClassParser produces it during annotation scanning. Changing BeanDefinition breaks both the producers and consumers of bean metadata across the entire framework."
+    },
+    {
+      "id": "spring-034",
+      "repo": "spring-framework",
+      "query": "What breaks if AbstractAutowireCapableBeanFactory's createBean method changes?",
+      "task_type": "what_breaks",
+      "ground_truth_files": [
+        "spring-beans/src/main/java/org/springframework/beans/factory/support/AbstractAutowireCapableBeanFactory.java",
+        "spring-beans/src/main/java/org/springframework/beans/factory/config/BeanPostProcessor.java",
+        "spring-beans/src/main/java/org/springframework/beans/factory/support/DefaultListableBeanFactory.java"
+      ],
+      "authority_tiers": {
+        "spring-beans/src/main/java/org/springframework/beans/factory/support/AbstractAutowireCapableBeanFactory.java": "ROOT",
+        "spring-beans/src/main/java/org/springframework/beans/factory/config/BeanPostProcessor.java": "ROOT",
+        "spring-beans/src/main/java/org/springframework/beans/factory/support/DefaultListableBeanFactory.java": "ROOT"
+      },
+      "difficulty": "hard",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "createBean() is the core factory method that orchestrates instantiation, population, and initialization. All BeanPostProcessor callbacks depend on its invocation order. DefaultListableBeanFactory inherits from it. Changing createBean breaks every bean's lifecycle in every Spring application."
+    },
+    {
+      "id": "spring-035",
+      "repo": "spring-framework",
+      "query": "What breaks if the PlatformTransactionManager interface contract is altered?",
+      "task_type": "what_breaks",
+      "ground_truth_files": [
+        "spring-tx/src/main/java/org/springframework/transaction/PlatformTransactionManager.java",
+        "spring-tx/src/main/java/org/springframework/transaction/interceptor/TransactionInterceptor.java",
+        "spring-tx/src/main/java/org/springframework/transaction/support/AbstractPlatformTransactionManager.java",
+        "spring-jdbc/src/main/java/org/springframework/jdbc/datasource/DataSourceTransactionManager.java"
+      ],
+      "authority_tiers": {
+        "spring-tx/src/main/java/org/springframework/transaction/PlatformTransactionManager.java": "ROOT",
+        "spring-tx/src/main/java/org/springframework/transaction/interceptor/TransactionInterceptor.java": "ROOT",
+        "spring-tx/src/main/java/org/springframework/transaction/support/AbstractPlatformTransactionManager.java": "ROOT",
+        "spring-jdbc/src/main/java/org/springframework/jdbc/datasource/DataSourceTransactionManager.java": "DERIVED"
+      },
+      "difficulty": "medium",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "PlatformTransactionManager is the three-method SPI (getTransaction, commit, rollback). TransactionInterceptor calls it for every @Transactional method. AbstractPlatformTransactionManager is the base implementation. DataSourceTransactionManager is the JDBC implementation. Changing the SPI breaks all transaction managers, all declarative transaction support, and all modules using transactions."
+    },
+    {
+      "id": "spring-036",
+      "repo": "spring-framework",
+      "query": "What breaks if HandlerMethodArgumentResolver's interface is changed?",
+      "task_type": "what_breaks",
+      "ground_truth_files": [
+        "spring-web/src/main/java/org/springframework/web/method/support/HandlerMethodArgumentResolver.java",
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/mvc/method/annotation/RequestMappingHandlerAdapter.java"
+      ],
+      "authority_tiers": {
+        "spring-web/src/main/java/org/springframework/web/method/support/HandlerMethodArgumentResolver.java": "ROOT",
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/mvc/method/annotation/RequestMappingHandlerAdapter.java": "ROOT"
+      },
+      "difficulty": "medium",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "HandlerMethodArgumentResolver has dozens of implementations (@RequestParam, @PathVariable, @RequestBody, @ModelAttribute resolvers). RequestMappingHandlerAdapter iterates over all of them for every controller invocation. Changing this interface breaks all parameter binding in Spring MVC."
+    },
+    {
+      "id": "spring-037",
+      "repo": "spring-framework",
+      "query": "What breaks if the AbstractApplicationContext.refresh() method is restructured?",
+      "task_type": "what_breaks",
+      "ground_truth_files": [
+        "spring-context/src/main/java/org/springframework/context/support/AbstractApplicationContext.java",
+        "spring-context/src/main/java/org/springframework/context/annotation/AnnotationConfigApplicationContext.java",
+        "spring-beans/src/main/java/org/springframework/beans/factory/config/BeanFactoryPostProcessor.java"
+      ],
+      "authority_tiers": {
+        "spring-context/src/main/java/org/springframework/context/support/AbstractApplicationContext.java": "ROOT",
+        "spring-context/src/main/java/org/springframework/context/annotation/AnnotationConfigApplicationContext.java": "DERIVED",
+        "spring-beans/src/main/java/org/springframework/beans/factory/config/BeanFactoryPostProcessor.java": "ROOT"
+      },
+      "difficulty": "hard",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "refresh() is the master lifecycle method that initializes the entire Spring container. It invokes BeanFactoryPostProcessors, registers BeanPostProcessors, initializes the message source, event multicaster, and all singleton beans. All context implementations (AnnotationConfigApplicationContext, web contexts) inherit this method. Changing refresh() breaks every Spring application startup."
+    },
+    {
+      "id": "spring-038",
+      "repo": "spring-framework",
+      "query": "What breaks if HttpMessageConverter's interface is modified?",
+      "task_type": "what_breaks",
+      "ground_truth_files": [
+        "spring-web/src/main/java/org/springframework/http/converter/HttpMessageConverter.java",
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/mvc/method/annotation/RequestMappingHandlerAdapter.java"
+      ],
+      "authority_tiers": {
+        "spring-web/src/main/java/org/springframework/http/converter/HttpMessageConverter.java": "ROOT",
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/mvc/method/annotation/RequestMappingHandlerAdapter.java": "ROOT"
+      },
+      "difficulty": "medium",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "HttpMessageConverter has many implementations (Jackson JSON, JAXB XML, String, ByteArray, etc.). RequestMappingHandlerAdapter uses them to read @RequestBody and write @ResponseBody. Changing this interface breaks all REST API serialization/deserialization."
+    },
+    {
+      "id": "spring-039",
+      "repo": "spring-framework",
+      "query": "What breaks if the ProxyFactory or AOP proxy creation logic changes?",
+      "task_type": "what_breaks",
+      "ground_truth_files": [
+        "spring-aop/src/main/java/org/springframework/aop/framework/ProxyFactory.java",
+        "spring-tx/src/main/java/org/springframework/transaction/interceptor/TransactionInterceptor.java",
+        "spring-aop/src/main/java/org/springframework/aop/framework/JdkDynamicAopProxy.java",
+        "spring-aop/src/main/java/org/springframework/aop/framework/CglibAopProxy.java"
+      ],
+      "authority_tiers": {
+        "spring-aop/src/main/java/org/springframework/aop/framework/ProxyFactory.java": "ROOT",
+        "spring-tx/src/main/java/org/springframework/transaction/interceptor/TransactionInterceptor.java": "DERIVED",
+        "spring-aop/src/main/java/org/springframework/aop/framework/JdkDynamicAopProxy.java": "ROOT",
+        "spring-aop/src/main/java/org/springframework/aop/framework/CglibAopProxy.java": "ROOT"
+      },
+      "difficulty": "hard",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "AOP proxy creation underlies @Transactional, @Async, @Cacheable, security, and all aspect-oriented features. ProxyFactory is the entry point. JdkDynamicAopProxy and CglibAopProxy are the two runtime implementations. TransactionInterceptor depends on being invoked through the proxy chain. Breaking proxies breaks all cross-cutting concerns."
+    },
+    {
+      "id": "spring-040",
+      "repo": "spring-framework",
+      "query": "What breaks if the ConfigurationClassParser changes how it processes @Import and @Bean?",
+      "task_type": "what_breaks",
+      "ground_truth_files": [
+        "spring-context/src/main/java/org/springframework/context/annotation/ConfigurationClassParser.java",
+        "spring-beans/src/main/java/org/springframework/beans/factory/config/BeanDefinition.java",
+        "spring-beans/src/main/java/org/springframework/beans/factory/support/DefaultListableBeanFactory.java"
+      ],
+      "authority_tiers": {
+        "spring-context/src/main/java/org/springframework/context/annotation/ConfigurationClassParser.java": "ROOT",
+        "spring-beans/src/main/java/org/springframework/beans/factory/config/BeanDefinition.java": "ROOT",
+        "spring-beans/src/main/java/org/springframework/beans/factory/support/DefaultListableBeanFactory.java": "ROOT"
+      },
+      "difficulty": "hard",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "ConfigurationClassParser is responsible for processing @Configuration, @Bean, @Import, @ComponentScan — the entire Java-based configuration model. It produces BeanDefinitions that are registered in DefaultListableBeanFactory. Changing it breaks every annotation-configured Spring application."
+    },
+    {
+      "id": "spring-041",
+      "repo": "spring-framework",
+      "query": "What breaks if the Environment/PropertySource abstraction changes?",
+      "task_type": "what_breaks",
+      "ground_truth_files": [
+        "spring-core/src/main/java/org/springframework/core/env/Environment.java",
+        "spring-context/src/main/java/org/springframework/context/support/PropertySourcesPlaceholderConfigurer.java",
+        "spring-context/src/main/java/org/springframework/context/support/AbstractApplicationContext.java"
+      ],
+      "authority_tiers": {
+        "spring-core/src/main/java/org/springframework/core/env/Environment.java": "ROOT",
+        "spring-context/src/main/java/org/springframework/context/support/PropertySourcesPlaceholderConfigurer.java": "ROOT",
+        "spring-context/src/main/java/org/springframework/context/support/AbstractApplicationContext.java": "ROOT"
+      },
+      "difficulty": "hard",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "Environment governs profile activation and property resolution. PropertySourcesPlaceholderConfigurer resolves ${...} placeholders using Environment. AbstractApplicationContext creates and configures the Environment during refresh(). Changing the Environment abstraction breaks all profile-conditional beans and all property resolution."
+    },
+    {
+      "id": "spring-042",
+      "repo": "spring-framework",
+      "query": "What breaks if the ConversionService interface is modified?",
+      "task_type": "what_breaks",
+      "ground_truth_files": [
+        "spring-core/src/main/java/org/springframework/core/convert/ConversionService.java",
+        "spring-beans/src/main/java/org/springframework/beans/BeanWrapper.java"
+      ],
+      "authority_tiers": {
+        "spring-core/src/main/java/org/springframework/core/convert/ConversionService.java": "ROOT",
+        "spring-beans/src/main/java/org/springframework/beans/BeanWrapper.java": "ROOT"
+      },
+      "difficulty": "hard",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "ConversionService is used throughout the framework for type conversion — in data binding, SpEL evaluation, configuration property resolution, and BeanWrapper property population. Modifying it breaks all implicit and explicit type conversions across Spring."
+    },
+    {
+      "id": "spring-043",
+      "repo": "spring-framework",
+      "query": "What breaks if the ApplicationEventMulticaster changes how events are broadcast?",
+      "task_type": "what_breaks",
+      "ground_truth_files": [
+        "spring-context/src/main/java/org/springframework/context/event/ApplicationEventMulticaster.java",
+        "spring-context/src/main/java/org/springframework/context/event/SimpleApplicationEventMulticaster.java",
+        "spring-context/src/main/java/org/springframework/context/support/AbstractApplicationContext.java"
+      ],
+      "authority_tiers": {
+        "spring-context/src/main/java/org/springframework/context/event/ApplicationEventMulticaster.java": "ROOT",
+        "spring-context/src/main/java/org/springframework/context/event/SimpleApplicationEventMulticaster.java": "ROOT",
+        "spring-context/src/main/java/org/springframework/context/support/AbstractApplicationContext.java": "ROOT"
+      },
+      "difficulty": "medium",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "ApplicationEventMulticaster is the backbone of Spring's event system. SimpleApplicationEventMulticaster is the default. AbstractApplicationContext.publishEvent() delegates to it. Changing event broadcasting breaks context lifecycle events (ContextRefreshedEvent, etc.), @EventListener, and all custom application events."
+    },
+    {
+      "id": "spring-044",
+      "repo": "spring-framework",
+      "query": "Is it safe to modify the BeanFactory interface to add a new method?",
+      "task_type": "is_safe_to_modify",
+      "ground_truth_files": [
+        "spring-beans/src/main/java/org/springframework/beans/factory/BeanFactory.java",
+        "spring-beans/src/main/java/org/springframework/beans/factory/support/DefaultListableBeanFactory.java",
+        "spring-context/src/main/java/org/springframework/context/ApplicationContext.java"
+      ],
+      "authority_tiers": {
+        "spring-beans/src/main/java/org/springframework/beans/factory/BeanFactory.java": "ROOT",
+        "spring-beans/src/main/java/org/springframework/beans/factory/support/DefaultListableBeanFactory.java": "ROOT",
+        "spring-context/src/main/java/org/springframework/context/ApplicationContext.java": "ROOT"
+      },
+      "difficulty": "easy",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "BeanFactory is the root DI container interface. It has enormous blast radius — ApplicationContext extends it, DefaultListableBeanFactory implements it, and every Spring module depends on it. Adding a method forces implementation in all concrete factories. This is NOT safe without careful cross-module coordination."
+    },
+    {
+      "id": "spring-045",
+      "repo": "spring-framework",
+      "query": "Is it safe to modify the DispatcherServlet class to change exception handling behavior?",
+      "task_type": "is_safe_to_modify",
+      "ground_truth_files": [
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/DispatcherServlet.java",
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/HandlerExceptionResolver.java"
+      ],
+      "authority_tiers": {
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/DispatcherServlet.java": "ROOT",
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/HandlerExceptionResolver.java": "ROOT"
+      },
+      "difficulty": "medium",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "DispatcherServlet is the single entry point for all Spring MVC requests. Its exception handling delegates to HandlerExceptionResolver implementations. Changing this behavior affects every web application using Spring MVC. High authority, high blast radius — NOT safe without broad regression testing."
+    },
+    {
+      "id": "spring-046",
+      "repo": "spring-framework",
+      "query": "Is it safe to modify the JdbcTemplate to change how SQL exceptions are translated?",
+      "task_type": "is_safe_to_modify",
+      "ground_truth_files": [
+        "spring-jdbc/src/main/java/org/springframework/jdbc/core/JdbcTemplate.java"
+      ],
+      "authority_tiers": {
+        "spring-jdbc/src/main/java/org/springframework/jdbc/core/JdbcTemplate.java": "DERIVED"
+      },
+      "difficulty": "easy",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "JdbcTemplate is the central class for JDBC operations, but it is a derived module — it consumes DataSource and PlatformTransactionManager contracts. Modifying exception translation changes behavior for all JDBC consumers but does not affect the core container. Moderate risk — requires careful testing of exception-handling code in downstream applications."
+    },
+    {
+      "id": "spring-047",
+      "repo": "spring-framework",
+      "query": "Is it safe to modify the TransactionInterceptor to change how propagation is applied?",
+      "task_type": "is_safe_to_modify",
+      "ground_truth_files": [
+        "spring-tx/src/main/java/org/springframework/transaction/interceptor/TransactionInterceptor.java",
+        "spring-tx/src/main/java/org/springframework/transaction/PlatformTransactionManager.java",
+        "spring-tx/src/main/java/org/springframework/transaction/support/AbstractPlatformTransactionManager.java"
+      ],
+      "authority_tiers": {
+        "spring-tx/src/main/java/org/springframework/transaction/interceptor/TransactionInterceptor.java": "ROOT",
+        "spring-tx/src/main/java/org/springframework/transaction/PlatformTransactionManager.java": "ROOT",
+        "spring-tx/src/main/java/org/springframework/transaction/support/AbstractPlatformTransactionManager.java": "ROOT"
+      },
+      "difficulty": "hard",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "TransactionInterceptor is invoked for every @Transactional method. It coordinates with PlatformTransactionManager via AbstractPlatformTransactionManager. Changing propagation behavior is extremely dangerous — it alters transactional semantics for every Spring application using declarative transactions."
+    },
+    {
+      "id": "spring-048",
+      "repo": "spring-framework",
+      "query": "Is it safe to modify the ExceptionHandlerExceptionResolver?",
+      "task_type": "is_safe_to_modify",
+      "ground_truth_files": [
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/mvc/method/annotation/ExceptionHandlerExceptionResolver.java",
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/HandlerExceptionResolver.java"
+      ],
+      "authority_tiers": {
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/mvc/method/annotation/ExceptionHandlerExceptionResolver.java": "DERIVED",
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/HandlerExceptionResolver.java": "ROOT"
+      },
+      "difficulty": "medium",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "ExceptionHandlerExceptionResolver implements the HandlerExceptionResolver SPI and processes @ExceptionHandler methods. It is the most commonly used exception resolver. Changes affect how all @ControllerAdvice and @ExceptionHandler methods work but do not alter the SPI itself. Moderate risk."
+    },
+    {
+      "id": "spring-049",
+      "repo": "spring-framework",
+      "query": "Is it safe to add a new method to the WebMvcConfigurer interface?",
+      "task_type": "is_safe_to_modify",
+      "ground_truth_files": [
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/config/annotation/WebMvcConfigurer.java",
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/config/annotation/WebMvcConfigurationSupport.java"
+      ],
+      "authority_tiers": {
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/config/annotation/WebMvcConfigurer.java": "ROOT",
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/config/annotation/WebMvcConfigurationSupport.java": "ROOT"
+      },
+      "difficulty": "medium",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "WebMvcConfigurer is implemented by application code to customize MVC configuration. Adding a method with a default implementation is relatively safe (Java default methods), but WebMvcConfigurationSupport must also be updated. Any non-default method addition would break all existing implementations."
+    },
+    {
+      "id": "spring-050",
+      "repo": "spring-framework",
+      "query": "Is it safe to modify DefaultListableBeanFactory's dependency resolution algorithm?",
+      "task_type": "is_safe_to_modify",
+      "ground_truth_files": [
+        "spring-beans/src/main/java/org/springframework/beans/factory/support/DefaultListableBeanFactory.java",
+        "spring-beans/src/main/java/org/springframework/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.java"
+      ],
+      "authority_tiers": {
+        "spring-beans/src/main/java/org/springframework/beans/factory/support/DefaultListableBeanFactory.java": "ROOT",
+        "spring-beans/src/main/java/org/springframework/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.java": "ROOT"
+      },
+      "difficulty": "hard",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "DefaultListableBeanFactory.resolveDependency() is the core of Spring's autowiring. AutowiredAnnotationBeanPostProcessor delegates to it for every @Autowired injection point. Changing the resolution algorithm can change which beans get injected in every Spring application — NOT safe without exhaustive testing."
+    },
+    {
+      "id": "spring-051",
+      "repo": "spring-framework",
+      "query": "Is it safe to modify the RequestMappingHandlerMapping to change URL matching rules?",
+      "task_type": "is_safe_to_modify",
+      "ground_truth_files": [
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/mvc/method/annotation/RequestMappingHandlerMapping.java",
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/handler/AbstractHandlerMethodMapping.java",
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/DispatcherServlet.java"
+      ],
+      "authority_tiers": {
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/mvc/method/annotation/RequestMappingHandlerMapping.java": "ROOT",
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/handler/AbstractHandlerMethodMapping.java": "ROOT",
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/DispatcherServlet.java": "ROOT"
+      },
+      "difficulty": "hard",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "RequestMappingHandlerMapping governs how URLs are matched to @RequestMapping methods. AbstractHandlerMethodMapping provides the matching infrastructure. DispatcherServlet delegates to it for every request. Changing URL matching rules could break routing for every endpoint in every Spring MVC application."
+    },
+    {
+      "id": "spring-052",
+      "repo": "spring-framework",
+      "query": "Is it safe to modify the SimpleApplicationEventMulticaster to change event dispatch threading?",
+      "task_type": "is_safe_to_modify",
+      "ground_truth_files": [
+        "spring-context/src/main/java/org/springframework/context/event/SimpleApplicationEventMulticaster.java",
+        "spring-context/src/main/java/org/springframework/context/support/AbstractApplicationContext.java"
+      ],
+      "authority_tiers": {
+        "spring-context/src/main/java/org/springframework/context/event/SimpleApplicationEventMulticaster.java": "ROOT",
+        "spring-context/src/main/java/org/springframework/context/support/AbstractApplicationContext.java": "ROOT"
+      },
+      "difficulty": "medium",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "SimpleApplicationEventMulticaster is the default event dispatcher used by AbstractApplicationContext. Changing threading behavior (e.g., making events async by default) would break applications that rely on synchronous event processing for transactional consistency. Moderate-to-high risk."
+    },
+    {
+      "id": "spring-053",
+      "repo": "spring-framework",
+      "query": "Is it safe to modify the DataSourceTransactionManager class?",
+      "task_type": "is_safe_to_modify",
+      "ground_truth_files": [
+        "spring-jdbc/src/main/java/org/springframework/jdbc/datasource/DataSourceTransactionManager.java",
+        "spring-tx/src/main/java/org/springframework/transaction/support/AbstractPlatformTransactionManager.java"
+      ],
+      "authority_tiers": {
+        "spring-jdbc/src/main/java/org/springframework/jdbc/datasource/DataSourceTransactionManager.java": "DERIVED",
+        "spring-tx/src/main/java/org/springframework/transaction/support/AbstractPlatformTransactionManager.java": "ROOT"
+      },
+      "difficulty": "easy",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "DataSourceTransactionManager is a concrete implementation of AbstractPlatformTransactionManager for JDBC. It extends the base class without altering the SPI. Changes are confined to JDBC transaction behavior and do not affect the transaction abstraction or other transaction managers. Relatively safe with targeted JDBC testing."
+    },
+    {
+      "id": "spring-054",
+      "repo": "spring-framework",
+      "query": "Is it safe to modify the SpelExpressionParser to add new expression syntax?",
+      "task_type": "is_safe_to_modify",
+      "ground_truth_files": [
+        "spring-expression/src/main/java/org/springframework/expression/spel/standard/SpelExpressionParser.java",
+        "spring-expression/src/main/java/org/springframework/expression/ExpressionParser.java"
+      ],
+      "authority_tiers": {
+        "spring-expression/src/main/java/org/springframework/expression/spel/standard/SpelExpressionParser.java": "ROOT",
+        "spring-expression/src/main/java/org/springframework/expression/ExpressionParser.java": "ROOT"
+      },
+      "difficulty": "medium",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "SpelExpressionParser is the default parser for Spring Expression Language, used in @Value, @Conditional, security expressions, and caching annotations. Adding new syntax is additive and unlikely to break existing expressions, but changes to the parser could inadvertently alter how existing expressions are evaluated. Moderate risk."
+    },
+    {
+      "id": "spring-055",
+      "repo": "spring-framework",
+      "query": "Where is the interface that defines how Spring MVC returns handler method results back as HTTP responses?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": [
+        "spring-web/src/main/java/org/springframework/web/method/support/HandlerMethodReturnValueHandler.java",
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/mvc/method/annotation/RequestMappingHandlerAdapter.java"
+      ],
+      "authority_tiers": {
+        "spring-web/src/main/java/org/springframework/web/method/support/HandlerMethodReturnValueHandler.java": "ROOT",
+        "spring-webmvc/src/main/java/org/springframework/web/servlet/mvc/method/annotation/RequestMappingHandlerAdapter.java": "ROOT"
+      },
+      "difficulty": "hard",
+      "annotation_method": "llm-assisted-validated",
+      "annotator_id": "codebrain-team",
+      "annotation_date": "2026-06-28",
+      "rationale": "HandlerMethodReturnValueHandler is the SPI for converting return values (ModelAndView, ResponseEntity, String, void, etc.) into HTTP responses. RequestMappingHandlerAdapter orchestrates the chain of return value handlers. Together they define how controller method outputs become HTTP responses."
+    }
+  ]
+}

@@ -1,0 +1,567 @@
+{
+  "repo": "django",
+  "repo_url": "https://github.com/django/django",
+  "commit": "e78991410b78391bc07a4b5010b273dfec814ff6",
+  "commit_tag": "e789914",
+  "commit_date": "2026-06-26",
+  "annotator": "codebrain-team",
+  "annotation_date": "2026-06-27",
+  "annotation_guidelines": "Ground truth files are those with structural authority over the queried behavior. Files are selected based on dependency centrality, schema ownership, and behavioral control — not textual similarity to the query. Paths are relative to the repo root.",
+  "task_type_distribution": {
+    "what_governs": "40%",
+    "where_is_schema": "25%",
+    "what_breaks": "20%",
+    "is_safe_to_modify": "15%"
+  },
+  "tasks": [
+    {
+      "id": "django-001",
+      "repo": "django",
+      "query": "What controls how Django resolves URL patterns to views?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["django/urls/resolvers.py", "django/urls/conf.py"],
+      "authority_tiers": {"django/urls/resolvers.py": "ROOT", "django/urls/conf.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "resolvers.py contains URLResolver and URLPattern which match incoming URLs to view functions. conf.py provides the path() and include() helpers that build the URL configuration."
+    },
+    {
+      "id": "django-002",
+      "repo": "django",
+      "query": "What governs how Django processes an incoming HTTP request through middleware and views?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["django/core/handlers/base.py", "django/core/handlers/wsgi.py"],
+      "authority_tiers": {"django/core/handlers/base.py": "ROOT", "django/core/handlers/wsgi.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "BaseHandler.get_response() is the central request-processing pipeline. It loads middleware, calls the view, and handles exceptions. WSGIHandler adapts it to the WSGI protocol."
+    },
+    {
+      "id": "django-003",
+      "repo": "django",
+      "query": "What controls all default settings for a Django project?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["django/conf/global_settings.py", "django/conf/__init__.py"],
+      "authority_tiers": {"django/conf/global_settings.py": "ROOT", "django/conf/__init__.py": "ROOT"},
+      "difficulty": "easy",
+      "rationale": "global_settings.py defines every default setting. conf/__init__.py provides the LazySettings / Settings classes that merge user settings with defaults."
+    },
+    {
+      "id": "django-004",
+      "repo": "django",
+      "query": "What governs how Django ORM models are defined and their metaclass behavior?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["django/db/models/base.py", "django/db/models/options.py"],
+      "authority_tiers": {"django/db/models/base.py": "ROOT", "django/db/models/options.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "base.py contains Model and ModelBase (the metaclass). options.py contains Options (the _meta object) which stores all metadata about a model's fields, relations, and constraints."
+    },
+    {
+      "id": "django-005",
+      "repo": "django",
+      "query": "What controls how Django defines model field types (CharField, IntegerField, etc.)?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["django/db/models/fields/__init__.py"],
+      "authority_tiers": {"django/db/models/fields/__init__.py": "ROOT"},
+      "difficulty": "easy",
+      "rationale": "fields/__init__.py defines Field (the base class) and all built-in field types. Every model field in Django inherits from this module."
+    },
+    {
+      "id": "django-006",
+      "repo": "django",
+      "query": "What governs how Django protects against Cross-Site Request Forgery (CSRF)?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["django/middleware/csrf.py", "django/views/decorators/csrf.py"],
+      "authority_tiers": {"django/middleware/csrf.py": "ROOT", "django/views/decorators/csrf.py": "DERIVED"},
+      "difficulty": "medium",
+      "rationale": "CsrfViewMiddleware in csrf.py enforces CSRF token validation on every POST. The decorators provide csrf_exempt and csrf_protect overrides."
+    },
+    {
+      "id": "django-007",
+      "repo": "django",
+      "query": "What controls how Django's template engine loads, parses, and renders templates?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["django/template/engine.py", "django/template/base.py", "django/template/loader.py"],
+      "authority_tiers": {"django/template/engine.py": "ROOT", "django/template/base.py": "ROOT", "django/template/loader.py": "DERIVED"},
+      "difficulty": "hard",
+      "rationale": "engine.py is the DjangoTemplates engine entry point. base.py defines Template, Node, and the compilation pipeline. loader.py handles template file discovery."
+    },
+    {
+      "id": "django-008",
+      "repo": "django",
+      "query": "What governs how Django's ORM builds and executes SQL queries?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["django/db/models/sql/query.py", "django/db/models/sql/compiler.py"],
+      "authority_tiers": {"django/db/models/sql/query.py": "ROOT", "django/db/models/sql/compiler.py": "ROOT"},
+      "difficulty": "hard",
+      "rationale": "query.py contains the Query class that represents a SQL query in abstract form. compiler.py contains SQLCompiler which translates Query objects into raw SQL strings."
+    },
+    {
+      "id": "django-009",
+      "repo": "django",
+      "query": "What controls how Django authenticates users and manages user accounts?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["django/contrib/auth/models.py", "django/contrib/auth/backends.py"],
+      "authority_tiers": {"django/contrib/auth/models.py": "ROOT", "django/contrib/auth/backends.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "models.py defines the User model and its manager (UserManager). backends.py provides ModelBackend, the default authentication backend that checks credentials against the database."
+    },
+    {
+      "id": "django-010",
+      "repo": "django",
+      "query": "What governs how Django's admin site registers models and generates CRUD interfaces?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["django/contrib/admin/sites.py", "django/contrib/admin/options.py"],
+      "authority_tiers": {"django/contrib/admin/sites.py": "ROOT", "django/contrib/admin/options.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "sites.py contains AdminSite which manages model registration and URL routing for the admin. options.py contains ModelAdmin which controls how each model appears and behaves in the admin."
+    },
+    {
+      "id": "django-011",
+      "repo": "django",
+      "query": "What controls how Django QuerySets evaluate and return results from the database?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["django/db/models/query.py", "django/db/models/manager.py"],
+      "authority_tiers": {"django/db/models/query.py": "ROOT", "django/db/models/manager.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "query.py defines QuerySet with filter(), exclude(), annotate(), and the lazy evaluation mechanism. manager.py defines Manager which is the interface from Model to QuerySet."
+    },
+    {
+      "id": "django-012",
+      "repo": "django",
+      "query": "What governs how Django handles password hashing and verification?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["django/contrib/auth/hashers.py"],
+      "authority_tiers": {"django/contrib/auth/hashers.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "hashers.py defines make_password(), check_password(), and all hasher classes (PBKDF2PasswordHasher, Argon2PasswordHasher, etc.). All password operations in Django route through this module."
+    },
+    {
+      "id": "django-013",
+      "repo": "django",
+      "query": "What controls how Django manages database transactions?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["django/db/transaction.py", "django/db/backends/base/base.py"],
+      "authority_tiers": {"django/db/transaction.py": "ROOT", "django/db/backends/base/base.py": "ROOT"},
+      "difficulty": "hard",
+      "rationale": "transaction.py provides atomic(), on_commit(), and transaction management. backends/base/base.py defines BaseDatabaseWrapper which implements the actual connection-level transaction operations."
+    },
+    {
+      "id": "django-014",
+      "repo": "django",
+      "query": "What governs how Django handles session storage and retrieval?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["django/contrib/sessions/backends/base.py", "django/contrib/sessions/middleware.py"],
+      "authority_tiers": {"django/contrib/sessions/backends/base.py": "ROOT", "django/contrib/sessions/middleware.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "backends/base.py defines SessionBase, the abstract session store API. middleware.py injects the session object into every request and persists changes on response."
+    },
+    {
+      "id": "django-015",
+      "repo": "django",
+      "query": "What controls how Django forms validate user input?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["django/forms/forms.py", "django/forms/fields.py"],
+      "authority_tiers": {"django/forms/forms.py": "ROOT", "django/forms/fields.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "forms.py defines BaseForm with is_valid() and the full validation pipeline (clean, field validation). fields.py defines all field types and their per-field validation logic."
+    },
+    {
+      "id": "django-016",
+      "repo": "django",
+      "query": "What governs how Django sends the signal system (pre_save, post_save, etc.)?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["django/dispatch/dispatcher.py", "django/db/models/signals.py"],
+      "authority_tiers": {"django/dispatch/dispatcher.py": "ROOT", "django/db/models/signals.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "dispatcher.py defines Signal and its connect/send mechanism. signals.py defines the concrete model signals (pre_save, post_save, pre_delete, post_delete)."
+    },
+    {
+      "id": "django-017",
+      "repo": "django",
+      "query": "What controls how Django's migration framework detects model changes?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["django/db/migrations/autodetector.py", "django/db/migrations/state.py"],
+      "authority_tiers": {"django/db/migrations/autodetector.py": "ROOT", "django/db/migrations/state.py": "ROOT"},
+      "difficulty": "hard",
+      "rationale": "autodetector.py compares old and new project states to generate migration operations. state.py provides ProjectState and ModelState which represent the model graph at a point in time."
+    },
+    {
+      "id": "django-018",
+      "repo": "django",
+      "query": "What governs how Django applies and rolls back database migrations?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["django/db/migrations/executor.py", "django/core/management/commands/migrate.py"],
+      "authority_tiers": {"django/db/migrations/executor.py": "ROOT", "django/core/management/commands/migrate.py": "DERIVED"},
+      "difficulty": "hard",
+      "rationale": "executor.py contains MigrationExecutor which plans and applies migrations in dependency order. migrate.py is the management command that drives the executor."
+    },
+    {
+      "id": "django-019",
+      "repo": "django",
+      "query": "What controls how Django's security middleware adds HTTP security headers?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["django/middleware/security.py", "django/middleware/clickjacking.py"],
+      "authority_tiers": {"django/middleware/security.py": "ROOT", "django/middleware/clickjacking.py": "ROOT"},
+      "difficulty": "easy",
+      "rationale": "SecurityMiddleware sets HSTS, SSL redirect, and other security headers. XFrameOptionsMiddleware in clickjacking.py controls X-Frame-Options."
+    },
+    {
+      "id": "django-020",
+      "repo": "django",
+      "query": "What governs how Django serves static files and collects them for deployment?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["django/contrib/staticfiles/finders.py", "django/contrib/staticfiles/storage.py"],
+      "authority_tiers": {"django/contrib/staticfiles/finders.py": "ROOT", "django/contrib/staticfiles/storage.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "finders.py defines the file-finder mechanism that locates static files across apps. storage.py defines StaticFilesStorage and ManifestStaticFilesStorage for collecting and serving statics."
+    },
+    {
+      "id": "django-021",
+      "repo": "django",
+      "query": "What controls how Django handles ASGI requests for async support?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["django/core/handlers/asgi.py", "django/core/handlers/base.py"],
+      "authority_tiers": {"django/core/handlers/asgi.py": "ROOT", "django/core/handlers/base.py": "ROOT"},
+      "difficulty": "hard",
+      "rationale": "asgi.py contains ASGIHandler which adapts the ASGI protocol. base.py provides the shared request processing pipeline used by both WSGI and ASGI handlers."
+    },
+    {
+      "id": "django-022",
+      "repo": "django",
+      "query": "What governs how Django validates passwords against configured validators?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["django/contrib/auth/password_validation.py"],
+      "authority_tiers": {"django/contrib/auth/password_validation.py": "ROOT"},
+      "difficulty": "easy",
+      "rationale": "password_validation.py defines validate_password() and all built-in validators (MinimumLengthValidator, CommonPasswordValidator, etc.)."
+    },
+    {
+      "id": "django-023",
+      "repo": "django",
+      "query": "Where is the base Model class defined that all Django models inherit from?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["django/db/models/base.py"],
+      "authority_tiers": {"django/db/models/base.py": "ROOT"},
+      "difficulty": "easy",
+      "rationale": "base.py defines Model and ModelBase. Every Django model class inherits from Model."
+    },
+    {
+      "id": "django-024",
+      "repo": "django",
+      "query": "Where is the Field base class and all built-in field types defined?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["django/db/models/fields/__init__.py"],
+      "authority_tiers": {"django/db/models/fields/__init__.py": "ROOT"},
+      "difficulty": "easy",
+      "rationale": "fields/__init__.py defines Field, CharField, IntegerField, DateTimeField, and all core field types."
+    },
+    {
+      "id": "django-025",
+      "repo": "django",
+      "query": "Where is the ForeignKey and ManyToManyField relationship schema defined?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["django/db/models/fields/related.py"],
+      "authority_tiers": {"django/db/models/fields/related.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "related.py defines ForeignKey, OneToOneField, and ManyToManyField. These are the contracts for all relational fields in Django."
+    },
+    {
+      "id": "django-026",
+      "repo": "django",
+      "query": "Where is the HttpRequest class defined?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["django/http/request.py"],
+      "authority_tiers": {"django/http/request.py": "ROOT"},
+      "difficulty": "easy",
+      "rationale": "request.py defines HttpRequest and QueryDict. Every view receives an HttpRequest instance."
+    },
+    {
+      "id": "django-027",
+      "repo": "django",
+      "query": "Where is the HttpResponse class and its variants (JsonResponse, Http404) defined?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["django/http/response.py"],
+      "authority_tiers": {"django/http/response.py": "ROOT"},
+      "difficulty": "easy",
+      "rationale": "response.py defines HttpResponse, HttpResponseRedirect, JsonResponse, StreamingHttpResponse, and all response status classes."
+    },
+    {
+      "id": "django-028",
+      "repo": "django",
+      "query": "Where is the User model and its AbstractBaseUser defined?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["django/contrib/auth/models.py", "django/contrib/auth/base_user.py"],
+      "authority_tiers": {"django/contrib/auth/models.py": "ROOT", "django/contrib/auth/base_user.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "models.py defines User and AbstractUser. base_user.py defines AbstractBaseUser, the minimal base class for custom user models."
+    },
+    {
+      "id": "django-029",
+      "repo": "django",
+      "query": "Where is the LazySettings configuration object defined?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["django/conf/__init__.py"],
+      "authority_tiers": {"django/conf/__init__.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "conf/__init__.py defines LazySettings and Settings. The global django.conf.settings object is a LazySettings instance that proxies to the actual settings module."
+    },
+    {
+      "id": "django-030",
+      "repo": "django",
+      "query": "Where is the base management command class defined?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["django/core/management/base.py"],
+      "authority_tiers": {"django/core/management/base.py": "ROOT"},
+      "difficulty": "easy",
+      "rationale": "base.py defines BaseCommand. Every manage.py command (migrate, runserver, makemigrations, etc.) inherits from BaseCommand."
+    },
+    {
+      "id": "django-031",
+      "repo": "django",
+      "query": "Where are Django's core exception classes (ValidationError, PermissionDenied, etc.) defined?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["django/core/exceptions.py"],
+      "authority_tiers": {"django/core/exceptions.py": "ROOT"},
+      "difficulty": "easy",
+      "rationale": "exceptions.py defines ValidationError, PermissionDenied, ObjectDoesNotExist, SuspiciousOperation, and other core exceptions used across the framework."
+    },
+    {
+      "id": "django-032",
+      "repo": "django",
+      "query": "Where is the database backend base interface defined?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["django/db/backends/base/base.py", "django/db/backends/base/operations.py"],
+      "authority_tiers": {"django/db/backends/base/base.py": "ROOT", "django/db/backends/base/operations.py": "ROOT"},
+      "difficulty": "hard",
+      "rationale": "base.py defines BaseDatabaseWrapper, the contract all database backends implement. operations.py defines BaseDatabaseOperations for SQL dialect differences."
+    },
+    {
+      "id": "django-033",
+      "repo": "django",
+      "query": "Where is the ContentType model and GenericForeignKey defined?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["django/contrib/contenttypes/models.py", "django/contrib/contenttypes/fields.py"],
+      "authority_tiers": {"django/contrib/contenttypes/models.py": "ROOT", "django/contrib/contenttypes/fields.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "models.py defines ContentType and ContentTypeManager. fields.py defines GenericForeignKey and GenericRelation for polymorphic relationships."
+    },
+    {
+      "id": "django-034",
+      "repo": "django",
+      "query": "Where are Django's generic class-based views (ListView, DetailView, CreateView) defined?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["django/views/generic/list.py", "django/views/generic/detail.py", "django/views/generic/edit.py", "django/views/generic/base.py"],
+      "authority_tiers": {"django/views/generic/list.py": "DERIVED", "django/views/generic/detail.py": "DERIVED", "django/views/generic/edit.py": "DERIVED", "django/views/generic/base.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "base.py defines View and TemplateView. list.py, detail.py, and edit.py define the CRUD views that inherit from base.py."
+    },
+    {
+      "id": "django-035",
+      "repo": "django",
+      "query": "Where is the migration operations schema (CreateModel, AddField, etc.) defined?",
+      "task_type": "where_is_schema",
+      "ground_truth_files": ["django/db/migrations/operations/__init__.py"],
+      "authority_tiers": {"django/db/migrations/operations/__init__.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "operations/__init__.py imports and exposes all migration operation classes that define what changes migrations can express."
+    },
+    {
+      "id": "django-036",
+      "repo": "django",
+      "query": "What breaks if django/db/models/base.py changes the Model.save() method signature?",
+      "task_type": "what_breaks",
+      "ground_truth_files": ["django/db/models/base.py", "django/contrib/auth/base_user.py", "django/forms/models.py"],
+      "authority_tiers": {"django/db/models/base.py": "ROOT", "django/contrib/auth/base_user.py": "ROOT", "django/forms/models.py": "DERIVED"},
+      "difficulty": "medium",
+      "rationale": "Every Django model inherits from Model. AbstractBaseUser overrides save(). ModelForm calls instance.save(). All third-party code calling .save() on any model breaks."
+    },
+    {
+      "id": "django-037",
+      "repo": "django",
+      "query": "What breaks if django/db/models/fields/__init__.py changes the Field.contribute_to_class() interface?",
+      "task_type": "what_breaks",
+      "ground_truth_files": ["django/db/models/fields/__init__.py", "django/db/models/fields/related.py", "django/db/models/base.py"],
+      "authority_tiers": {"django/db/models/fields/__init__.py": "ROOT", "django/db/models/fields/related.py": "ROOT", "django/db/models/base.py": "ROOT"},
+      "difficulty": "hard",
+      "rationale": "contribute_to_class is called by ModelBase metaclass for every field on every model. ForeignKey, ManyToManyField, and all custom fields override this method."
+    },
+    {
+      "id": "django-038",
+      "repo": "django",
+      "query": "What breaks if django/urls/resolvers.py changes how URL pattern matching works?",
+      "task_type": "what_breaks",
+      "ground_truth_files": ["django/urls/resolvers.py", "django/urls/conf.py", "django/contrib/admin/sites.py"],
+      "authority_tiers": {"django/urls/resolvers.py": "ROOT", "django/urls/conf.py": "ROOT", "django/contrib/admin/sites.py": "DERIVED"},
+      "difficulty": "medium",
+      "rationale": "Every Django application depends on URL resolution. Admin generates its own URL patterns. Breaking the resolver breaks all routing including admin, contrib apps, and all user URLs."
+    },
+    {
+      "id": "django-039",
+      "repo": "django",
+      "query": "What breaks if django/core/handlers/base.py changes the middleware chain processing?",
+      "task_type": "what_breaks",
+      "ground_truth_files": ["django/core/handlers/base.py", "django/middleware/csrf.py", "django/middleware/security.py", "django/contrib/sessions/middleware.py"],
+      "authority_tiers": {"django/core/handlers/base.py": "ROOT", "django/middleware/csrf.py": "DERIVED", "django/middleware/security.py": "DERIVED", "django/contrib/sessions/middleware.py": "DERIVED"},
+      "difficulty": "hard",
+      "rationale": "BaseHandler loads and chains all middleware. Changing the chain processing breaks CSRF protection, session handling, security headers, auth, and all custom middleware."
+    },
+    {
+      "id": "django-040",
+      "repo": "django",
+      "query": "What breaks if django/conf/global_settings.py changes the default MIDDLEWARE list?",
+      "task_type": "what_breaks",
+      "ground_truth_files": ["django/conf/global_settings.py", "django/core/handlers/base.py"],
+      "authority_tiers": {"django/conf/global_settings.py": "ROOT", "django/core/handlers/base.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "global_settings.py provides default MIDDLEWARE. Changing defaults alters the security posture and behavior of every Django project that does not explicitly override MIDDLEWARE."
+    },
+    {
+      "id": "django-041",
+      "repo": "django",
+      "query": "What breaks if django/dispatch/dispatcher.py changes the Signal.send() return format?",
+      "task_type": "what_breaks",
+      "ground_truth_files": ["django/dispatch/dispatcher.py", "django/db/models/signals.py", "django/db/models/base.py"],
+      "authority_tiers": {"django/dispatch/dispatcher.py": "ROOT", "django/db/models/signals.py": "ROOT", "django/db/models/base.py": "ROOT"},
+      "difficulty": "hard",
+      "rationale": "Signal.send() is called by Model.save() and Model.delete() for pre/post signals. Changing the return format breaks all signal receivers that inspect return values."
+    },
+    {
+      "id": "django-042",
+      "repo": "django",
+      "query": "What breaks if django/http/response.py changes the HttpResponse constructor?",
+      "task_type": "what_breaks",
+      "ground_truth_files": ["django/http/response.py", "django/template/response.py", "django/views/defaults.py"],
+      "authority_tiers": {"django/http/response.py": "ROOT", "django/template/response.py": "DERIVED", "django/views/defaults.py": "DERIVED"},
+      "difficulty": "medium",
+      "rationale": "TemplateResponse inherits from HttpResponse. Default error views (404, 500) return HttpResponse instances. Every view in Django returns an HttpResponse."
+    },
+    {
+      "id": "django-043",
+      "repo": "django",
+      "query": "What breaks if django/contrib/auth/hashers.py changes the password hash format?",
+      "task_type": "what_breaks",
+      "ground_truth_files": ["django/contrib/auth/hashers.py", "django/contrib/auth/models.py", "django/contrib/auth/backends.py"],
+      "authority_tiers": {"django/contrib/auth/hashers.py": "ROOT", "django/contrib/auth/models.py": "ROOT", "django/contrib/auth/backends.py": "ROOT"},
+      "difficulty": "hard",
+      "rationale": "Changing the hash format makes all existing stored passwords unverifiable. User.check_password() and ModelBackend.authenticate() both depend on the hasher format."
+    },
+    {
+      "id": "django-044",
+      "repo": "django",
+      "query": "Is it safe to modify tests/auth_tests/?",
+      "task_type": "is_safe_to_modify",
+      "ground_truth_files": ["tests/auth_tests/"],
+      "expected_risk": "SAFE",
+      "authority_tiers": {"tests/auth_tests/": "LEAF"},
+      "difficulty": "easy",
+      "rationale": "Test files are leaf nodes. No production code depends on them."
+    },
+    {
+      "id": "django-045",
+      "repo": "django",
+      "query": "Is it safe to modify django/db/models/base.py?",
+      "task_type": "is_safe_to_modify",
+      "ground_truth_files": ["django/db/models/base.py"],
+      "expected_risk": "REQUIRES_HUMAN_APPROVAL",
+      "authority_tiers": {"django/db/models/base.py": "ROOT"},
+      "difficulty": "easy",
+      "rationale": "Model base class is the root of the entire ORM. Every Django model inherits from it. Changes here have the highest possible blast radius."
+    },
+    {
+      "id": "django-046",
+      "repo": "django",
+      "query": "Is it safe to modify django/conf/global_settings.py?",
+      "task_type": "is_safe_to_modify",
+      "ground_truth_files": ["django/conf/global_settings.py"],
+      "expected_risk": "REQUIRES_HUMAN_APPROVAL",
+      "authority_tiers": {"django/conf/global_settings.py": "ROOT"},
+      "difficulty": "easy",
+      "rationale": "global_settings.py provides defaults for all Django settings. Changing a default silently changes behavior for every project that relies on that default."
+    },
+    {
+      "id": "django-047",
+      "repo": "django",
+      "query": "Is it safe to modify django/middleware/clickjacking.py?",
+      "task_type": "is_safe_to_modify",
+      "ground_truth_files": ["django/middleware/clickjacking.py"],
+      "expected_risk": "CAUTION",
+      "authority_tiers": {"django/middleware/clickjacking.py": "DERIVED"},
+      "difficulty": "medium",
+      "rationale": "XFrameOptionsMiddleware is security-sensitive but has a narrow scope — it only sets the X-Frame-Options header. Moderate blast radius."
+    },
+    {
+      "id": "django-048",
+      "repo": "django",
+      "query": "Is it safe to modify django/contrib/admin/options.py?",
+      "task_type": "is_safe_to_modify",
+      "ground_truth_files": ["django/contrib/admin/options.py", "django/contrib/admin/sites.py"],
+      "expected_risk": "CAUTION",
+      "authority_tiers": {"django/contrib/admin/options.py": "DERIVED", "django/contrib/admin/sites.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "ModelAdmin is widely subclassed but is a contrib module, not core. Changes affect admin behavior for all registered models but do not affect non-admin code."
+    },
+    {
+      "id": "django-049",
+      "repo": "django",
+      "query": "Is it safe to modify django/views/defaults.py?",
+      "task_type": "is_safe_to_modify",
+      "ground_truth_files": ["django/views/defaults.py"],
+      "expected_risk": "CAUTION",
+      "authority_tiers": {"django/views/defaults.py": "DERIVED"},
+      "difficulty": "easy",
+      "rationale": "defaults.py contains the built-in error views (page_not_found, server_error). They are frequently overridden by projects, so changes have moderate impact."
+    },
+    {
+      "id": "django-050",
+      "repo": "django",
+      "query": "Is it safe to modify django/core/handlers/base.py?",
+      "task_type": "is_safe_to_modify",
+      "ground_truth_files": ["django/core/handlers/base.py"],
+      "expected_risk": "REQUIRES_HUMAN_APPROVAL",
+      "authority_tiers": {"django/core/handlers/base.py": "ROOT"},
+      "difficulty": "easy",
+      "rationale": "BaseHandler is the root of the request-processing pipeline. Every request in every Django application passes through it."
+    },
+    {
+      "id": "django-051",
+      "repo": "django",
+      "query": "Is it safe to modify tests/template_tests/?",
+      "task_type": "is_safe_to_modify",
+      "ground_truth_files": ["tests/template_tests/"],
+      "expected_risk": "SAFE",
+      "authority_tiers": {"tests/template_tests/": "LEAF"},
+      "difficulty": "easy",
+      "rationale": "Test directories are leaf nodes. No production code depends on them."
+    },
+    {
+      "id": "django-052",
+      "repo": "django",
+      "query": "Is it safe to modify django/utils/crypto.py?",
+      "task_type": "is_safe_to_modify",
+      "ground_truth_files": ["django/utils/crypto.py", "django/core/signing.py"],
+      "expected_risk": "REQUIRES_HUMAN_APPROVAL",
+      "authority_tiers": {"django/utils/crypto.py": "ROOT", "django/core/signing.py": "ROOT"},
+      "difficulty": "hard",
+      "rationale": "crypto.py provides get_random_string(), salted_hmac(), and constant_time_compare() used by sessions, CSRF, password hashing, and signing. Changes here affect security across the framework."
+    },
+    {
+      "id": "django-053",
+      "repo": "django",
+      "query": "What controls how Django handles multipart file uploads?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["django/http/multipartparser.py", "django/core/files/uploadhandler.py"],
+      "authority_tiers": {"django/http/multipartparser.py": "ROOT", "django/core/files/uploadhandler.py": "ROOT"},
+      "difficulty": "medium",
+      "rationale": "multipartparser.py parses multipart/form-data request bodies. uploadhandler.py defines UploadHandler interface (MemoryFileUploadHandler, TemporaryFileUploadHandler) that controls where uploaded files are stored."
+    },
+    {
+      "id": "django-054",
+      "repo": "django",
+      "query": "What governs how Django's internationalization and translation system works?",
+      "task_type": "what_governs",
+      "ground_truth_files": ["django/utils/translation/__init__.py", "django/middleware/locale.py"],
+      "authority_tiers": {"django/utils/translation/__init__.py": "ROOT", "django/middleware/locale.py": "DERIVED"},
+      "difficulty": "hard",
+      "rationale": "translation/__init__.py provides gettext_lazy(), activate(), and all i18n APIs. locale.py is LocaleMiddleware which detects and activates the user's language per request."
+    }
+  ]
+}

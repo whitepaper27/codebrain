@@ -1,0 +1,55 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# CodeBrain data output
+codebrain-data/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+
+# Test coverage
+coverage/
+
+# Benchmark caches, results, and cloned repos
+benchmarks/.embedding-cache/
+benchmarks/.authority-cache/
+benchmarks/results/
+benchmarks/repos/
+
+# Local planning / notes
+plan.md
+claude.md
+CLAUDE.md
+
+# Local editor/agent state
+.claude/
+
+# OS / shell crash dumps
+*.stackdump
+
+# npm
+*.tgz
+
+# Logs
+*.log
+
+# Python
+__pycache__/
+*.pyc
+
+# CodeBrain-2 (Track B pilot — kept local, not part of v1 repo)
+codebrain-2/
