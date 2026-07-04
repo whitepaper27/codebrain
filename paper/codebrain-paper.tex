@@ -24,14 +24,14 @@
 \email{sahil.soni2409@gmail.com}
 
 \begin{abstract}
-AI coding agents rely on retrieved repository context to explain, modify, and debug software systems.
-Existing retrieval methods optimize for textual or semantic relevance, but relevance alone does not identify which code governs system behavior.
-In large repositories, database schemas, configuration files, core domain modules, and shared contracts may be structurally more authoritative than the files most similar to a query.
-We introduce \textbf{CodeAuthorityBench}, a benchmark of 388 repository-understanding tasks across 7 real-world open-source projects, where the correct answer requires identifying source-of-truth files rather than semantically similar snippets.
-We evaluate \textbf{CodeBrain}, an authority-aware re-ranking method that combines hybrid retrieval with graph-based structural authority scores derived from tree-sitter AST parsing, dependency analysis, and repository-level signals.
-Our results show that authority-aware re-ranking significantly outperforms lexical, symbolic, graph-only, repo-map, and BM25-rerank baselines (all $p < 0.0001$, Wilcoxon signed-rank, large effect sizes), while remaining competitive with strong neural and hybrid retrieval.
-CodeBrain leads 7 of 10 metrics, including all top-$k$ recall, NDCG, authority recall, and blast-radius F1.
-We release CodeAuthorityBench, the CodeBrain tool as an open-source MCP server, and full reproduction scripts.
+AI coding agents increasingly rely on retrieved repository context, but existing retrieval systems primarily optimize for textual or semantic relevance.
+In software repositories, the files that matter most for safe modification are often \emph{foundation} files: schemas, state definitions, interfaces, shared types, configuration modules, and persistence contracts that define the assumptions downstream code depends on.
+We introduce \textbf{CodeAuthorityBench}, a benchmark of 388 repository-understanding tasks across 7 open-source projects and 5 languages that evaluates whether retrieval methods identify such source-of-truth files rather than merely similar snippets.
+We also present \textbf{CodeBrain}, a tree-sitter-based authority re-ranking method that combines hybrid retrieval with deterministic structural signals from dependency graphs, schema and interface ownership, and repository topology.
+Across seven baseline implementations, CodeBrain significantly outperforms lexical, symbolic, graph-only, repo-map, and BM25-rerank methods (all $p < 0.0001$, Wilcoxon signed-rank), while remaining competitive with strong dense and hybrid retrieval.
+It leads 7 of 10 metrics, including top-$k$ recall, NDCG, authority recall, and blast-radius F1.
+Qualitative analysis on three non-benchmark repositories shows that CodeBrain consistently surfaces foundation files while under-ranking orchestration and entry-point files, motivating a distinction between \emph{foundation authority} and \emph{orchestration authority}.
+We release the benchmark, the CodeBrain MCP server, and reproduction scripts to support further research on authority-aware retrieval for AI coding agents.
 \end{abstract}
 
 \keywords{code retrieval, authority scoring, AI coding agents, benchmark, structural analysis}
@@ -52,6 +52,7 @@ In a large codebase, a database schema file may be the source of truth for data 
 A shared configuration module may govern the behavior of 40 downstream services, yet appear less ``relevant'' than a single endpoint handler that references the same terms.
 
 We define \textbf{code authority} as a structural property: a file's authority is determined by its position in the dependency graph, its role as a schema or interface definer, its import centrality, and its stability over time.
+We refer to the high-authority files that many components depend on---schemas, state and type definitions, interfaces, configuration, and persistence contracts---as \emph{foundation} files, and we frame authority-aware retrieval primarily as the problem of surfacing them.
 Authority-aware retrieval aims to surface files that \emph{govern} the queried behavior, not merely files that \emph{mention} it.
 
 This work makes four contributions:
@@ -182,6 +183,7 @@ Ground-truth files are annotated based on structural authority---dependency cent
 Tasks were generated using LLM-assisted annotation and validated against repository structure.
 Each task includes a rationale explaining why the ground-truth files are authoritative.
 Annotation guidelines specify that ground-truth files should be those with structural authority over the queried behavior, prioritizing files that other modules depend on over files that merely mention the queried concept.
+To support independent validation, we release an annotation kit (sampling, scoring, and disagreement-analysis scripts) and plan to report Cohen's~$\kappa$ for a held-out, externally human-annotated subset in a subsequent revision.
 
 
 %% ============================================================
