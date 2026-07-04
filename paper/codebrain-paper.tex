@@ -1,5 +1,5 @@
-% CodeBrain: Authority-Aware Retrieval for Agentic Code Understanding
-% Target: MSR / ASE Research Track (ACL format)
+% CodeAuthorityBench: A Benchmark for Authority-Aware Code Retrieval in AI Coding Agents
+% Target: arXiv preprint / MSR Data & Tool track (ACM acmart, sigconf)
 
 \documentclass[sigconf,nonacm]{acmart}
 
@@ -141,7 +141,7 @@ CodeAuthorityBench is a benchmark of repository-understanding tasks where the co
 
 \subsection{Repositories}
 
-We selected 7 widely-used open-source repositories spanning 4 programming languages and diverse architectural patterns (Table~\ref{tab:repos}).
+We selected 7 widely-used open-source repositories spanning 5 programming languages (JavaScript, TypeScript, Python, Go, and Java) and diverse architectural patterns (Table~\ref{tab:repos}).
 
 \begin{table}[h]
 \centering
@@ -211,7 +211,7 @@ We report 10 metrics covering retrieval quality, authority identification, and d
 \begin{itemize}
     \item \textbf{Retrieval}: P@5, R@1, R@5, R@10, MRR, NDCG@5, NDCG@10
     \item \textbf{Authority}: Authority Recall (binary: did any ground-truth file appear in top-$k$?)
-    \item \textbf{Edit risk}: Classification accuracy of predicted risk level (SAFE/CAUTION/REQUIRES\_HUMAN\_APPROVAL) against annotated expected risk, using tiered scoring (1.0 exact, 0.5 adjacent, 0.0 opposite)
+    \item \textbf{Edit risk}: An exploratory retrieval-based proxy for \texttt{is\_safe\_to\_modify} tasks, scored as whether the top-ranked file is among the ground-truth authoritative files (binary top-1). This is a coarse proxy rather than a full risk-tier (SAFE/CAUTION/REQUIRES\_HUMAN\_APPROVAL) classification, which we leave to future work
     \item \textbf{Blast radius}: F1 between predicted and actual affected files, evaluated at $k = |\text{ground truth}|$ to avoid fixed-$k$ precision penalties
 \end{itemize}
 
@@ -251,7 +251,7 @@ Table~\ref{tab:significance} presents Wilcoxon signed-rank tests comparing CodeB
 
 \begin{table}[h]
 \centering
-\caption{Wilcoxon signed-rank tests (CodeBrain vs. baselines, per-task MRR). $^{***}p < 0.001$.}
+\caption{Wilcoxon signed-rank tests (CodeBrain vs.\ baselines, per-task MRR). $\Delta$MRR is the mean per-task MRR difference over \emph{non-tied} pairs; because the Wilcoxon test excludes zero-difference (tied) pairs, the number of contributing pairs is $n < 388$ and $\Delta$MRR therefore differs from the difference of aggregate MRR values in Table~\ref{tab:main}. $^{***}p < 0.001$.}
 \label{tab:significance}
 \begin{tabular}{lrrrr}
 \toprule
@@ -304,7 +304,7 @@ All variants use the same hybrid retrieval; only the authority re-ranking signal
 
 \begin{table}[h]
 \centering
-\caption{Ablation study: contribution of individual authority signals.}
+\caption{Ablation study: contribution of individual authority signals. Variants come from a separate configuration sweep over the same pipeline; absolute values differ slightly from Table~\ref{tab:main} (e.g., \textbf{flat-only} corresponds to the Hybrid baseline), so this table should be read for the \emph{relative} contribution of each signal rather than for absolute parity with the main results.}
 \label{tab:ablation}
 \begin{tabular}{lccccc}
 \toprule
@@ -365,9 +365,12 @@ We therefore treat CodeBrain v1 as a foundation-authority baseline and leave exp
 \paragraph{Limitations.}
 (1) Ground-truth annotations are LLM-assisted and may contain noise; inter-annotator agreement was not measured.
 (2) The authority weight $\alpha = 0.3$ was not extensively tuned; systematic hyperparameter search may yield better configurations.
-(3) CodeAuthorityBench covers 7 repositories in 4 languages; generalization to other languages and repository architectures requires further evaluation.
+(3) CodeAuthorityBench covers 7 repositories in 5 languages; generalization to other languages and repository architectures requires further evaluation.
 (4) The benchmark evaluates static retrieval; integration with actual agent workflows (e.g., measuring whether authority-aware retrieval reduces agent edit errors) is left to future work.
 (5) As the error analysis above indicates, the current model captures foundation authority but not orchestration authority; entry-point and coordinator files may therefore be under-ranked for behavior-governance queries even when correctly ranked for blast-radius and safe-to-modify queries.
+(6) \textbf{Label--signal overlap (construct validity).} Ground-truth authority labels were annotated using structural criteria---dependency centrality, schema ownership, and behavioral control---that overlap with the signals CodeBrain scores. The benchmark therefore currently measures how faithfully the method operationalizes this structural definition of authority, rather than validating that definition against an independent notion of authority. Re-annotation using criteria independent of the scoring signals, together with inter-annotator agreement (Cohen's~$\kappa$) from external annotators, is pending; we release an annotation kit to support this. Results should be read with this overlap in mind.
+(7) Several benchmark repositories (e.g., Flask, Django, Express) are widely represented in the pretraining data of the neural baselines, which may inflate their absolute scores; evaluating on lower-profile repositories is future work.
+(8) At the evaluated commits, five ground-truth paths (three in Express, two in FastAPI) do not resolve to files present in the checkout and were scored as misses; these are documented in the released \texttt{PIN\_PROVENANCE.md} and affect five tasks, not the aggregate conclusions.
 
 
 %% ============================================================
@@ -387,7 +390,7 @@ We release CodeAuthorityBench, the CodeBrain MCP server, and full reproduction s
 \section*{Data and Code Availability}
 %% ============================================================
 
-CodeAuthorityBench---all 388 tasks with ground-truth annotations and rationales---together with the CodeBrain implementation and MCP server, the eight baseline implementations, and the complete evaluation and statistical-analysis scripts, is publicly available at \url{https://github.com/whitepaper27/codebrain}.
+CodeAuthorityBench---all 388 tasks with ground-truth annotations and rationales---together with the CodeBrain implementation and MCP server, the seven baseline implementations, and the complete evaluation and statistical-analysis scripts, is publicly available at \url{https://github.com/whitepaper27/codebrain}.
 For reproducibility, each benchmark repository is pinned to the exact commit it was evaluated against (documented in \texttt{benchmarks/PIN\_PROVENANCE.md}), and the released scripts regenerate every table in this paper from those pinned states.
 The software and dataset are released under the Apache~2.0 license.
 
@@ -403,7 +406,7 @@ The software and dataset are released under the Apache~2.0 license.
 \bibitem{treebench2026}
 Sahil Soni. 2026.
 \newblock TreeBench: Evaluating Hierarchical Retrieval for Regulatory Question Answering.
-\newblock \emph{arXiv preprint}.
+\newblock Manuscript. \url{https://github.com/whitepaper27/TreeBench}.
 
 \bibitem{feng2020codebert}
 Zhangyin Feng, Daya Guo, Duyu Tang, Nan Duan, Xiaocheng Feng, Ming Gong, Linjun Shou, Bing Qin, Ting Liu, Daxin Jiang, and Ming Zhou. 2020.
