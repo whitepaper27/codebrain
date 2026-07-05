@@ -28,7 +28,7 @@ AI coding agents increasingly rely on retrieved repository context, but existing
 In software repositories, the files that matter most for safe modification are often \emph{foundation} files: schemas, state definitions, interfaces, shared types, configuration modules, and persistence contracts that define the assumptions downstream code depends on.
 We introduce \textbf{CodeAuthorityBench}, a benchmark of 388 repository-understanding tasks across 7 open-source projects and 5 languages that evaluates whether retrieval methods identify such source-of-truth files rather than merely similar snippets.
 We also present \textbf{CodeBrain}, a tree-sitter-based authority re-ranking method that combines hybrid retrieval with deterministic structural signals from dependency graphs, schema and interface ownership, and repository topology.
-Across seven baseline implementations, CodeBrain significantly outperforms lexical, symbolic, graph-only, repo-map, and BM25-rerank methods (all $p < 0.0001$, Wilcoxon signed-rank), while remaining competitive with strong dense and hybrid retrieval.
+CodeBrain significantly outperforms all five non-neural baselines---lexical, symbolic, graph-only, repo-map, and BM25-rerank (all $p < 0.0001$, Wilcoxon signed-rank)---while remaining competitive with strong dense and hybrid retrieval (differences not statistically significant).
 It leads 7 of 10 metrics, including top-$k$ recall, NDCG, authority recall, and blast-radius F1.
 Qualitative analysis on three non-benchmark repositories shows that CodeBrain consistently surfaces foundation files while under-ranking orchestration and entry-point files, motivating a distinction between \emph{foundation authority} and \emph{orchestration authority}.
 We release the benchmark, the CodeBrain MCP server, and reproduction scripts to support further research on authority-aware retrieval for AI coding agents.
@@ -73,14 +73,15 @@ CodeAuthorityBench tests whether the same structural failure exists in software 
 %% ============================================================
 
 \paragraph{Code retrieval for AI agents.}
-Code search has evolved from keyword matching to semantic retrieval using embedding models~\cite{feng2020codebert,guo2022unixcoder}.
+Code search has evolved from keyword matching to semantic retrieval, driven by large-scale datasets~\cite{husain2019codesearchnet} and pre-trained embedding models~\cite{feng2020codebert,guo2022unixcoder}.
 Tools such as GitHub code search, Sourcegraph, and Aider's repo-map~\cite{aider2024} provide various retrieval strategies.
 Many tools still rely heavily on flat semantic or symbol retrieval and do not explicitly model structural authority.
 
 \paragraph{Structural code analysis.}
 AST-based and call-graph-based tools have a long history in software engineering~\cite{reps1998program}.
-Tree-sitter provides fast incremental parsing across languages.
+Tree-sitter~\cite{brunsfeld2018treesitter} provides fast incremental parsing across languages.
 Tools like Understand, Sourcetrail, and ctags extract structural information, but their output is typically used for navigation rather than retrieval ranking.
+Our notion of authority is analogous to link-analysis ranking in hypertext, where highly referenced nodes are termed \emph{authorities}~\cite{kleinberg1999hits,page1999pagerank}; we adapt this idea to intra-repository dependency structure.
 
 \paragraph{Hierarchical retrieval.}
 TreeBench~\cite{treebench2026} demonstrated that flat retrieval achieves only 45\% required-node recall on hierarchical regulatory structures, even when answer accuracy reaches 76\%.
@@ -117,7 +118,7 @@ where $S$ is the set of structural signals and $\sigma_s$ is the normalized sign
 \end{itemize}
 
 All signals are deterministic: the same repository and configuration always produce the same scores.
-No LLM, no embeddings, no randomness between runs.
+The authority scores themselves use no LLM, no embeddings, and no randomness between runs; dense retrieval contributes only to the candidate pool that the authority signals subsequently re-rank.
 
 \subsection{Authority-Aware Re-ranking}
 
@@ -283,7 +284,7 @@ Table~\ref{tab:pertask} shows CodeBrain's advantage varies by task type.
 
 \begin{table}[h]
 \centering
-\caption{CodeBrain vs.\ Hybrid by task type (P@5 / Auth Recall).}
+\caption{Per-task-type \emph{contributions} to the overall P@5 and Authority Recall (CodeBrain vs.\ Hybrid). Values are each task type's contribution to the aggregate metric---weighted by task-type frequency---so each column sums over the four rows to the corresponding overall value in Table~\ref{tab:main} (e.g., CB Auth: $29.1+22.9+17.3+14.4 \approx 83.8$); they are \emph{not} per-subset rates.}
 \label{tab:pertask}
 \begin{tabular}{lcccc}
 \toprule
@@ -439,6 +440,26 @@ Fengji Zhang, Bei Chen, Yue Zhang, Jin Liu, Daoguang Zan, Yi Mao, Jian-Guang Lou
 Tianyang Liu, Canwen Xu, and Julian McAuley. 2023.
 \newblock RepoBench: Benchmarking Repository-Level Code Auto-Completion Systems.
 \newblock \emph{arXiv preprint arXiv:2306.03091}.
+
+\bibitem{husain2019codesearchnet}
+Hamel Husain, Ho-Hsiang Wu, Tiferet Gazit, Miltiadis Allamanis, and Marc Brockschmidt. 2019.
+\newblock CodeSearchNet Challenge: Evaluating the State of Semantic Code Search.
+\newblock \emph{arXiv preprint arXiv:1909.09436}.
+
+\bibitem{kleinberg1999hits}
+Jon M. Kleinberg. 1999.
+\newblock Authoritative Sources in a Hyperlinked Environment.
+\newblock \emph{Journal of the ACM} 46, 5 (1999), 604--632.
+
+\bibitem{page1999pagerank}
+Lawrence Page, Sergey Brin, Rajeev Motwani, and Terry Winograd. 1999.
+\newblock The PageRank Citation Ranking: Bringing Order to the Web.
+\newblock \emph{Stanford InfoLab Technical Report}.
+
+\bibitem{brunsfeld2018treesitter}
+Max Brunsfeld and contributors. 2018.
+\newblock tree-sitter: An Incremental Parsing System for Programming Tools.
+\newblock \url{https://github.com/tree-sitter/tree-sitter}.
 
 \end{thebibliography}
 
