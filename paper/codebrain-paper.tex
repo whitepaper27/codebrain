@@ -113,13 +113,22 @@ where $S$ is the set of structural signals and $\sigma_s$ is the normalized sign
 \begin{itemize}
     \item \textbf{Dependency centrality} ($w_1 = 0.35$): Normalized in-degree in the import/call graph. Files that many modules depend on score higher.
     \item \textbf{Schema/interface ownership} ($w_2 = 0.20$): Binary detection of type definitions, interface declarations, schema files, and configuration exports.
-    \item \textbf{Churn stability} ($w_3 = 0.15$): Inverse of normalized commit frequency. Stable files that rarely change score higher.
+    \item \textbf{Churn stability} ($w_3 = 0.15$): Inverse of normalized commit frequency, counted over the full git history up to the evaluated commit. Stable files that rarely change score higher.
     \item \textbf{Directory prior} ($w_4 = 0.15$): Heuristic based on directory path. Files in \texttt{core/}, \texttt{schema/}, \texttt{config/} directories receive a bonus; files in \texttt{test/}, \texttt{scripts/}, \texttt{examples/} receive a penalty.
     \item \textbf{Out-degree penalty} ($w_5 = 0.15$): Normalized out-degree penalty. Files that import many other modules are consumers, not providers.
 \end{itemize}
 
 All signals are deterministic: the same repository and configuration always produce the same scores.
 The authority scores themselves use no LLM, no embeddings, and no randomness between runs; dense retrieval contributes only to the candidate pool that the authority signals subsequently re-rank.
+
+\subsection{Dependency Graph Construction}
+
+The dependency-centrality and out-degree signals rely on a static dependency graph built from tree-sitter parses.
+Import, \texttt{require}, and \texttt{include} statements are extracted per language and resolved to intra-repository files: relative specifiers are resolved against the importing file's directory, trying source extensions (\texttt{.ts}, \texttt{.tsx}, \texttt{.js}, \texttt{.py}, \texttt{.java}, \texttt{.go}, \texttt{.c}, \texttt{.h}), ECMAScript-style extension swaps (e.g.\ \texttt{.js}$\rightarrow$\texttt{.ts}), and directory index files (\texttt{index.*}, \texttt{\_\_init\_\_.py}, \texttt{mod.go}).
+Specifiers that resolve outside the repository (external packages) are excluded, so authority reflects \emph{intra-repository} dependency structure only.
+Call edges are added heuristically by matching call-site names to exported definitions in other files.
+Because resolution is path-based, it is most complete for relative-import languages (Python, JavaScript, TypeScript); package- and module-path systems (Java, Go) resolve less completely and yield sparser graphs.
+We did not formally validate graph accuracy against a reference call/import graph; we treat this as a limitation (see Section~\ref{sec:limitations}).
 
 \subsection{Authority-Aware Re-ranking}
 
@@ -167,14 +176,14 @@ Spring Framework & Java & 4,761 \\
 
 \subsection{Task Types}
 
-Each task consists of a natural-language query, a task type, and a set of ground-truth authoritative files annotated by developer judgment.
+Each task consists of a natural-language query, a task type, and a set of ground-truth authoritative files produced by LLM-assisted annotation with subsequent human validation.
 We define four task types:
 
 \begin{itemize}
     \item \textbf{what\_governs} (29\%): ``What file controls X?'' Requires identifying the source-of-truth file for a behavior.
     \item \textbf{where\_is\_schema} (25\%): ``Where is the schema for X?'' Requires locating type definitions, interfaces, or data models.
     \item \textbf{what\_breaks} (25\%): ``What breaks if X changes?'' Requires predicting downstream impact (blast radius).
-    \item \textbf{is\_safe\_to\_modify} (21\%): ``Is it safe to modify X?'' Requires classifying edit risk as SAFE, CAUTION, or REQUIRES\_HUMAN\_APPROVAL.
+    \item \textbf{is\_safe\_to\_modify} (21\%): ``Is it safe to modify X?'' Requires classifying edit risk as SAFE, CAUTION, or REQUIRES\_HUMAN\_APPROVAL. In the current release this task is scored only through a binary top-1 edit-risk proxy (Section~\ref{sec:metrics}); the full three-way risk-tier evaluation is not yet implemented.
 \end{itemize}
 
 The benchmark contains 388 tasks total: approximately 55 per repository, with a controlled 8-task fixture for sanity checking.
@@ -209,6 +218,7 @@ We evaluate 7 baselines spanning lexical, symbolic, graph-based, and neural retr
 \textbf{CodeBrain} uses the same Hybrid candidate pool, re-ranked with real tree-sitter authority scores ($\alpha = 0.3$).
 
 \subsection{Metrics}
+\label{sec:metrics}
 
 We report 10 metrics covering retrieval quality, authority identification, and downstream impact prediction:
 
@@ -216,7 +226,7 @@ We report 10 metrics covering retrieval quality, authority identification, and d
     \item \textbf{Retrieval}: P@5, R@1, R@5, R@10, MRR, NDCG@5, NDCG@10
     \item \textbf{Authority}: Authority Recall (binary: did any ground-truth file appear in top-$k$?)
     \item \textbf{Edit risk}: An exploratory retrieval-based proxy for \texttt{is\_safe\_to\_modify} tasks, scored as whether the top-ranked file is among the ground-truth authoritative files (binary top-1). This is a coarse proxy rather than a full risk-tier (SAFE/CAUTION/REQUIRES\_HUMAN\_APPROVAL) classification, which we leave to future work
-    \item \textbf{Blast radius}: F1 between predicted and actual affected files, evaluated at $k = |\text{ground truth}|$ to avoid fixed-$k$ precision penalties
+    \item \textbf{Blast radius}: F1 between predicted and actual affected files, evaluated at $k = |\text{ground truth}|$. Note that this is an \emph{oracle-$k$} evaluation---the method is given the true number of affected files---which is generous and inflates absolute F1 relative to a setting where $k$ must also be predicted
 \end{itemize}
 
 Statistical significance is assessed via Wilcoxon signed-rank tests on per-task MRR with continuity correction.
@@ -274,6 +284,8 @@ Hybrid         &  0.16 & 0.827 & 0.01 & +0.008 \\
 
 The results reveal two distinct regimes.
 Against non-neural baselines (BM25, SymbolSearch, CallGraph, RepoMap, BM25+Rerank), CodeBrain achieves highly significant improvements with medium-to-large effect sizes ($r = 0.31$--$0.83$).
+We note that the largest effect sizes correspond to the weakest baselines---e.g.\ $r = 0.83$ against CallGraph, whose MRR of 3.8\% indicates it is not a competitive retriever---so the more meaningful comparisons are against RepoMap and BM25+Rerank ($r = 0.31$--$0.53$).
+All seven comparisons are uncorrected for multiple testing; the five non-neural results remain significant at $p < 0.0001$ even under a conservative Bonferroni correction.
 Against neural baselines (DenseRetrieval, Hybrid), the differences on MRR are not statistically significant.
 However, CodeBrain consistently leads on structural metrics: authority recall (83.8\% vs 82.2\% Hybrid, 81.2\% Dense), NDCG@10 (54.1\% vs 53.1\%, 52.8\%), and blast-radius F1 (28.4\% vs 27.9\%, 24.9\%).
 
@@ -299,7 +311,8 @@ is\_safe\_to\_modify & 3.0 & \textbf{3.0} & 14.4 & \textbf{14.4} \\
 \end{tabular}
 \end{table}
 
-The largest gains appear on \texttt{what\_governs} tasks---precisely the task type where identifying the structural source of truth matters most---and on \texttt{what\_breaks} tasks where blast-radius prediction benefits from authority-aware ranking.
+In absolute-contribution terms, the largest authority-recall gain over Hybrid falls on \texttt{what\_breaks} ($16.0 \to 17.3$, $+1.3$), where blast-radius prediction benefits from authority-aware ranking, followed by \texttt{what\_governs} ($28.9 \to 29.1$, $+0.2$).
+Because these are contributions to the aggregate metric, they are weighted by each task type's share of the benchmark (\texttt{what\_governs} is 29\% of tasks), so a large contribution partly reflects task frequency rather than per-task difficulty.
 
 \subsection{Ablation Study}
 
@@ -367,6 +380,7 @@ Conversely, widely imported utility files, such as diagramming helpers, can be o
 We therefore treat CodeBrain v1 as a foundation-authority baseline and leave explicit orchestration/entry-point authority modeling to future work, evaluated as an optional ablation rather than folded into the reported configuration to avoid post-hoc tuning of the benchmark results.
 
 \paragraph{Limitations.}
+\label{sec:limitations}
 (1) Ground-truth annotations are LLM-assisted and may contain noise; inter-annotator agreement was not measured.
 (2) The authority weight $\alpha = 0.3$ was not extensively tuned; systematic hyperparameter search may yield better configurations.
 (3) CodeAuthorityBench covers 7 repositories in 5 languages; generalization to other languages and repository architectures requires further evaluation.
@@ -375,6 +389,7 @@ We therefore treat CodeBrain v1 as a foundation-authority baseline and leave exp
 (6) \textbf{Label--signal overlap (construct validity).} Ground-truth authority labels were annotated using structural criteria---dependency centrality, schema ownership, and behavioral control---that overlap with the signals CodeBrain scores. The benchmark therefore currently measures how faithfully the method operationalizes this structural definition of authority, rather than validating that definition against an independent notion of authority. Re-annotation using criteria independent of the scoring signals, together with inter-annotator agreement (Cohen's~$\kappa$) from external annotators, is pending; we release an annotation kit to support this. Results should be read with this overlap in mind.
 (7) Several benchmark repositories (e.g., Flask, Django, Express) are widely represented in the pretraining data of the neural baselines, which may inflate their absolute scores; evaluating on lower-profile repositories is future work.
 (8) At the evaluated commits, five ground-truth paths (three in Express, two in FastAPI) do not resolve to files present in the checkout and were scored as misses; these are documented in the released \texttt{PIN\_PROVENANCE.md} and affect five tasks, not the aggregate conclusions.
+(9) The dependency graph is built by static, path-based import resolution and heuristic name-based call matching; its accuracy was not formally validated, and resolution is less complete for package/module-path languages (Java, Go), which may bias authority estimates for those repositories. Blast-radius F1 is computed at oracle $k$ (the true number of affected files), which inflates its absolute value.
 
 
 %% ============================================================
@@ -410,7 +425,7 @@ The software and dataset are released under the Apache~2.0 license.
 \bibitem{treebench2026}
 Sahil Soni. 2026.
 \newblock TreeBench: Evaluating Hierarchical Retrieval for Regulatory Question Answering.
-\newblock Manuscript. \url{https://github.com/whitepaper27/TreeBench}.
+\newblock Zenodo. \url{https://doi.org/10.5281/zenodo.20978266}. Dataset: \url{https://huggingface.co/datasets/sahilsoni2409/TreeBench}.
 
 \bibitem{feng2020codebert}
 Zhangyin Feng, Daya Guo, Duyu Tang, Nan Duan, Xiaocheng Feng, Ming Gong, Linjun Shou, Bing Qin, Ting Liu, Daxin Jiang, and Ming Zhou. 2020.
